@@ -1,7 +1,7 @@
 import { Outlet } from "@remix-run/react";
 import { Header } from "~/components";
 
-export default function __App() {
+export default function Index() {
   return (
     <>
       <Header />
