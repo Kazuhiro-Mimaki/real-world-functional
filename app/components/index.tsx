@@ -1,1 +1,1 @@
-export { Header } from "./shared";
+export { Header } from './shared';
