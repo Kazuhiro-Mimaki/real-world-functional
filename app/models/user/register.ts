@@ -9,26 +9,23 @@ import { db } from '~/server/db.server';
 // Value object
 // ====================
 
-type Username = string;
-const Username = (input: string): Result<Username, Error> => {
-  if (input.length < 3) {
-    return err(new Error('Must be 3 or more characters long'));
+const validateUsername = (input: FormDataEntryValue | null): Result<string, Error> => {
+  if (typeof input !== 'string' || input.length < 3) {
+    return err(new Error('Username must be 3 or more characters long'));
   }
   return ok(input);
 };
 
-type Email = string;
-const Email = (input: string): Result<Email, Error> => {
-  if (input.length < 5) {
-    return err(new Error('Must be 5 or more characters long'));
+const validateEmail = (input: FormDataEntryValue | null): Result<string, Error> => {
+  if (typeof input !== 'string' || input.length < 5) {
+    return err(new Error('Email must be 5 or more characters long'));
   }
   return ok(input);
 };
 
-type Password = string;
-const Password = (input: string): Result<Password, Error> => {
-  if (input.length < 6) {
-    return err(new Error('Must be 6 or more characters long'));
+const validatePassword = (input: FormDataEntryValue | null): Result<string, Error> => {
+  if (typeof input !== 'string' || input.length < 6) {
+    return err(new Error('Password must be 6 or more characters long'));
   }
   return ok(input);
 };
@@ -44,18 +41,18 @@ export type UnValidatedUser = {
   password: FormDataEntryValue | null;
 };
 
-type ValidatedUser = {
+export type ValidatedUser = {
   kind: 'Validated';
-  username: Username;
-  email: Email;
-  password: Password;
+  username: string;
+  email: string;
+  password: string;
 };
 
-type CreatedUser = {
+export type CreatedUser = {
   kind: 'Created';
-  username: Username;
-  email: Email;
-  password: Password;
+  username: string;
+  email: string;
+  password: string;
 };
 
 // ====================
@@ -63,9 +60,9 @@ type CreatedUser = {
 // ====================
 
 export const validateUser = (model: UnValidatedUser): Result<ValidatedUser, Error> => {
-  const username = Username(model.username as string);
-  const email = Email(model.email as string);
-  const password = Password(model.password as string);
+  const username = validateUsername(model.username);
+  const email = validateEmail(model.email);
+  const password = validatePassword(model.password);
 
   const values = Result.combine([username, email, password]);
 
@@ -78,12 +75,12 @@ export const validateUser = (model: UnValidatedUser): Result<ValidatedUser, Erro
 };
 
 export const createUser = (model: ValidatedUser): ResultAsync<CreatedUser, Error> => {
-  const findUserByUsername = (username: Username) =>
+  const findUserByUsername = (username: string) =>
     ResultAsync.fromPromise(db.user.findFirst({ where: { username: username } }), () => new Error('Prisma error'));
 
   const checkUserExists = (existsUser: User | null): Result<User | null, Error> => {
     if (existsUser) {
-      return err(new Error(`User with username ${model.username} already exists`));
+      return err(new Error(`User with username "${model.username}" already exists`));
     }
     return ok(existsUser);
   };
