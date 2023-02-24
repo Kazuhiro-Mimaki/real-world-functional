@@ -2,24 +2,26 @@ import bcrypt from 'bcryptjs';
 import { db } from './db.server';
 import type { Session } from '@remix-run/node';
 import { createCookieSessionStorage } from '@remix-run/node';
+import { okAsync, ResultAsync } from 'neverthrow';
 
 type RegisterForm = {
-  name: string;
+  username: string;
+  email: string;
   password: string;
 };
 
-export const getByName = async (name: string) => {
-  return await db.user.findFirst({
-    where: { name },
-  });
+export const getByUsername = (username: string) => {
+  return ResultAsync.fromPromise(db.user.findFirst({ where: { username } }), () => new Error('error')).andThen((user) =>
+    okAsync(user)
+  );
 };
 
-export const register = async ({ name, password }: RegisterForm) => {
+export const register = async ({ username, email, password }: RegisterForm) => {
   const passwordHash = await bcrypt.hash(password, 10);
   const user = await db.user.create({
-    data: { name, password: passwordHash },
+    data: { username, email, password: passwordHash },
   });
-  return { id: user.id, name };
+  return { id: user.id, username };
 };
 
 const sessionSecret = process.env.SESSION_SECRET;

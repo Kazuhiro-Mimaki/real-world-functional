@@ -1,92 +1,40 @@
-import { Form, Link } from '@remix-run/react';
+import { Form, Link, useActionData } from '@remix-run/react';
 import { json, redirect } from '@remix-run/node';
 import type { ActionArgs } from '@remix-run/node';
-import { commitUserSession, createUserSession, getByName, register } from '~/server/user';
-
-const validateUsername = (username: unknown) => {
-  if (typeof username !== 'string' || username.length < 3) {
-    return `Usernames must be at least 3 characters long`;
-  }
-};
-
-const validatePassword = (password: unknown) => {
-  if (typeof password !== 'string' || password.length < 6) {
-    return `Passwords must be at least 6 characters long`;
-  }
-};
+import { commitUserSession, createUserSession } from '~/server/user';
+import { ok } from 'neverthrow';
+import { createUser, saveUser, validateUser } from '~/models/user/register';
 
 export const action = async ({ request }: ActionArgs) => {
   const form = await request.formData();
-  const name = form.get('username');
-  const password = form.get('password');
 
-  if (typeof name !== 'string' || typeof password !== 'string') {
-    return json(
-      {
-        fieldErrors: null,
-        fields: null,
-        formError: `Form not submitted correctly.`,
-      },
-      { status: 400 }
-    );
-  }
-
-  const fields = { name, password };
-  const fieldErrors = {
-    name: validateUsername(name),
-    password: validatePassword(password),
+  const input = {
+    kind: 'UnValidated' as const,
+    username: form.get('username'),
+    email: form.get('email'),
+    password: form.get('password'),
   };
-  if (Object.values(fieldErrors).some(Boolean)) {
-    return json(
-      {
-        fieldErrors,
-        fields,
-        formError: null,
-      },
-      {
-        status: 400,
-      }
-    );
-  }
 
-  const existsUser = await getByName(name);
-  if (existsUser) {
-    return json(
-      {
-        fieldErrors: null,
-        fields,
-        formError: `User with username ${name} already exists`,
-      },
-      {
-        status: 400,
-      }
-    );
-  }
+  const result = await ok(input).andThen(validateUser).asyncAndThen(createUser).andThen(saveUser);
 
-  const user = await register({ name, password });
-  if (!user) {
-    return json(
-      {
-        fieldErrors: null,
-        fields,
-        formError: `Something went wrong trying to create a new user.`,
-      },
-      {
-        status: 400,
-      }
-    );
-  }
-
-  const session = await createUserSession(user.id);
-
-  return redirect('/', {
-    headers: {
-      'Set-Cookie': await commitUserSession(session),
+  return result.match(
+    async (user) => {
+      const session = await createUserSession(user.id);
+      return redirect('/', {
+        headers: {
+          'Set-Cookie': await commitUserSession(session),
+        },
+      });
     },
-  });
+    async (error) => {
+      return json({ message: error.message });
+    }
+  );
 };
 
 export default function Register() {
+  const error = useActionData<typeof action>();
+
   return (
     <div className='container flex flex-wrap flex-col space-y-8 items-center mx-auto pt-12'>
       <div>
@@ -121,6 +69,8 @@ export default function Register() {
             Sign up
           </button>
         </fieldset>
+
+        {error ? <em className='text-red-600'>{error.message}</em> : null}
       </Form>
     </div>
   );
