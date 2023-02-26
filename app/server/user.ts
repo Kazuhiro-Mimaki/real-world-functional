@@ -53,3 +53,14 @@ export const createUserSession = async (userId: string) => {
 export const commitUserSession = async (session: Session) => {
   return await storage.commitSession(session);
 };
+
+export const getUserSession = async (request: Request) => {
+  return await storage.getSession(request.headers.get('Cookie'));
+};
+
+export async function getUserId(request: Request) {
+  const session = await getUserSession(request);
+  const userId = session.get('userId');
+  if (!userId || typeof userId !== 'string') return null;
+  return userId;
+}
