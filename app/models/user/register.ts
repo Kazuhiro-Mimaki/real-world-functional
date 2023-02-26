@@ -4,31 +4,7 @@ import { Result } from 'neverthrow';
 import { ResultAsync } from 'neverthrow';
 import { err, ok } from 'neverthrow';
 import { db } from '~/server/db.server';
-
-// ====================
-// Value object
-// ====================
-
-const validateUsername = (input: FormDataEntryValue | null): Result<string, Error> => {
-  if (typeof input !== 'string' || input.length < 3) {
-    return err(new Error('Username must be 3 or more characters long'));
-  }
-  return ok(input);
-};
-
-const validateEmail = (input: FormDataEntryValue | null): Result<string, Error> => {
-  if (typeof input !== 'string' || input.length < 5) {
-    return err(new Error('Email must be 5 or more characters long'));
-  }
-  return ok(input);
-};
-
-const validatePassword = (input: FormDataEntryValue | null): Result<string, Error> => {
-  if (typeof input !== 'string' || input.length < 6) {
-    return err(new Error('Password must be 6 or more characters long'));
-  }
-  return ok(input);
-};
+import { EmailAddress, Password, UserName } from './vo';
 
 // ====================
 // Type
@@ -36,23 +12,23 @@ const validatePassword = (input: FormDataEntryValue | null): Result<string, Erro
 
 export type UnValidatedUser = {
   kind: 'UnValidated';
-  username: FormDataEntryValue | null;
-  email: FormDataEntryValue | null;
-  password: FormDataEntryValue | null;
+  username: string;
+  email: string;
+  password: string;
 };
 
 export type ValidatedUser = {
   kind: 'Validated';
-  username: string;
-  email: string;
-  password: string;
+  username: UserName;
+  email: EmailAddress;
+  password: Password;
 };
 
 export type CreatedUser = {
   kind: 'Created';
-  username: string;
-  email: string;
-  password: string;
+  username: UserName;
+  email: EmailAddress;
+  password: Password;
 };
 
 // ====================
@@ -60,9 +36,9 @@ export type CreatedUser = {
 // ====================
 
 export const validateUser = (model: UnValidatedUser): Result<ValidatedUser, Error> => {
-  const username = validateUsername(model.username);
-  const email = validateEmail(model.email);
-  const password = validatePassword(model.password);
+  const username = UserName(model.username);
+  const email = EmailAddress(model.email);
+  const password = Password(model.password);
 
   const values = Result.combine([username, email, password]);
 
