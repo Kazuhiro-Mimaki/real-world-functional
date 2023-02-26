@@ -88,5 +88,5 @@ export const saveUser = ({ username, email, password }: RegisterForm): ResultAsy
       () => new Error('Prisma error')
     );
 
-  return createPasswordHash.andThen(saveUserToDB).andThen((user) => ok(user));
+  return createPasswordHash.andThen(saveUserToDB).andThen(ok);
 };
