@@ -1,29 +1,5 @@
-import bcrypt from 'bcryptjs';
-import { db } from './db.server';
 import type { Session } from '@remix-run/node';
 import { createCookieSessionStorage } from '@remix-run/node';
-import { okAsync, ResultAsync } from 'neverthrow';
-import type { User } from '@prisma/client';
-import type { UserName } from '~/models/users/vo';
-import type { CreatedUser } from '~/models';
-
-export const getByUsername = (username: UserName): ResultAsync<User | null, Error> => {
-  return ResultAsync.fromPromise(db.user.findFirst({ where: { username } }), () => new Error('Prisma error')).andThen(
-    okAsync
-  );
-};
-
-export const saveUser = ({ username, email, password }: CreatedUser): ResultAsync<User, Error> => {
-  const createPasswordHash = ResultAsync.fromPromise(bcrypt.hash(password, 10), () => new Error('Bcrypt error'));
-  const saveUserToDB = (passwordHash: string) =>
-    ResultAsync.fromPromise(
-      db.user.create({
-        data: { username, email, password: passwordHash },
-      }),
-      () => new Error('Prisma error')
-    );
-  return createPasswordHash.andThen(saveUserToDB);
-};
 
 const sessionSecret = process.env.SESSION_SECRET;
 if (!sessionSecret) {

@@ -1,9 +1,10 @@
 import { Form, Link, useActionData } from '@remix-run/react';
 import { json, redirect } from '@remix-run/node';
 import type { ActionArgs } from '@remix-run/node';
-import { commitUserSession, createUserSession, getByUsername, saveUser } from '~/server/user';
+import { commitUserSession, createUserSession } from '~/server/user';
 import { createUserWorkFlow } from '~/models/users/workflows/createUser';
 import { checkUserExists } from '~/models/users/domain';
+import { getByUsername, saveUser } from '~/models/users/repo';
 
 // ====================
 // Type
@@ -13,6 +14,7 @@ export const action = async ({ request }: ActionArgs) => {
   const workFlow = createUserWorkFlow(checkUserExists(getByUsername));
 
   const form = await request.formData();
+
   const unValidatedUser = {
     kind: 'UnValidated' as const,
     username: form.get('username') as string,

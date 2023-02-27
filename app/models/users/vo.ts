@@ -1,7 +1,17 @@
+import bcrypt from 'bcryptjs';
 import type { Result } from 'neverthrow';
+import { ResultAsync } from 'neverthrow';
 import { err, ok } from 'neverthrow';
 import type { Branded } from '../baseTypes';
 import { String5, Email } from '../baseTypes';
+
+/**
+ * UserId
+ */
+export type UserId = Branded<string, 'UserId'>;
+export const UserId = (input: string): Result<UserId, Error> => {
+  return ok(input as UserId);
+};
 
 /**
  * UserName
@@ -29,3 +39,5 @@ export const Password = (input: string): Result<Password, Error> => {
   const parsed = String5.safeParse(input);
   return parsed.success ? ok(parsed.data as Password) : err(new Error('Password must be at least 5 characters long'));
 };
+export const createPasswordHash = (password: Password): ResultAsync<string, Error> =>
+  ResultAsync.fromPromise(bcrypt.hash(password, 10), () => new Error('Bcrypt error'));

@@ -22,7 +22,7 @@ type ValidatedUser = {
   password: Password;
 };
 
-type CreatedUser = {
+export type CreatedUser = {
   kind: 'Created';
   username: UserName;
   email: EmailAddress;
