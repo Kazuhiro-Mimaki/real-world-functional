@@ -1,1 +1,1 @@
-export { register } from './user';
+export { getByUsername, saveUser } from './user';

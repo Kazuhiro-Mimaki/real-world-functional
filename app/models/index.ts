@@ -1,1 +1,1 @@
-export type { UnValidatedUser, ValidatedUser, CreatedUser } from './user';
+export type { UnValidatedUser, ValidatedUser, CreatedUser } from './users';

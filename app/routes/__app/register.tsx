@@ -1,21 +1,26 @@
 import { Form, Link, useActionData } from '@remix-run/react';
 import { json, redirect } from '@remix-run/node';
 import type { ActionArgs } from '@remix-run/node';
-import { commitUserSession, createUserSession } from '~/server/user';
-import { ok } from 'neverthrow';
-import { createUser, saveUser, validateUser } from '~/models/user/register';
+import { commitUserSession, createUserSession, getByUsername, saveUser } from '~/server/user';
+import { createUserWorkFlow } from '~/models/users/workflows/createUser';
+import { checkUserExists } from '~/models/users/domain';
+
+// ====================
+// Type
+// ====================
 
 export const action = async ({ request }: ActionArgs) => {
-  const form = await request.formData();
+  const workFlow = createUserWorkFlow(checkUserExists(getByUsername));
 
-  const input = {
+  const form = await request.formData();
+  const unValidatedUser = {
     kind: 'UnValidated' as const,
     username: form.get('username') as string,
     email: form.get('email') as string,
     password: form.get('password') as string,
   };
 
-  const result = await ok(input).andThen(validateUser).asyncAndThen(createUser).andThen(saveUser);
+  const result = await workFlow(unValidatedUser).andThen(saveUser);
 
   return result.match(
     async (user) => {
