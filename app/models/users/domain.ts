@@ -1,19 +1,17 @@
 import type { User as UserModel } from '@prisma/client';
-import type { ResultAsync } from 'neverthrow';
-import { err, ok, Result } from 'neverthrow';
-import type { GetByUsername } from './repo';
+import { Result } from 'neverthrow';
 import { UserId, UserName, EmailAddress } from './vo';
 
 /**
  * User
  */
-export type User = Readonly<{
-  id: UserId;
-  username: UserName;
-  email: EmailAddress;
-  createdAt: Date;
-  updatedAt: Date;
-}>;
+export type User = {
+  readonly id: UserId;
+  readonly username: UserName;
+  readonly email: EmailAddress;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+};
 export const User = (user: UserModel): Result<User, Error> => {
   const userId = UserId(user.id);
   const username = UserName(user.username);
@@ -28,15 +26,3 @@ export const User = (user: UserModel): Result<User, Error> => {
     updatedAt: user.updatedAt,
   }));
 };
-
-export type CheckUserExists = (username: UserName) => ResultAsync<null, Error>;
-export const checkUserExists =
-  (getByUsername: GetByUsername): CheckUserExists =>
-  (username: UserName): ResultAsync<null, Error> => {
-    return getByUsername(username).andThen((user) => {
-      if (user) {
-        return err(new Error(`User with username "${user.username}" already exists`));
-      }
-      return ok(null);
-    });
-  };

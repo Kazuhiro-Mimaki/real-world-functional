@@ -1,8 +1,8 @@
-import { Result } from 'neverthrow';
+import { err, Result } from 'neverthrow';
 import type { ResultAsync } from 'neverthrow';
 import { ok } from 'neverthrow';
 import { EmailAddress, Password, UserName } from '../vo';
-import type { CheckUserExists } from '../domain';
+import type { GetByUsername } from '../repository';
 
 // ====================
 // Type
@@ -30,7 +30,7 @@ export type CreatedUser = {
 };
 
 // ====================
-// Function
+// step1
 // ====================
 
 export type ValidateUser = (model: UnValidatedUser) => Result<ValidatedUser, Error>;
@@ -49,20 +49,33 @@ export const validateUser = (model: UnValidatedUser): Result<ValidatedUser, Erro
   }));
 };
 
+// ====================
+// step2
+// ====================
+
 export type CreateUser = (model: ValidatedUser) => ResultAsync<CreatedUser, Error>;
 export const createUser =
-  (checkUserExists: CheckUserExists): CreateUser =>
-  (model: ValidatedUser): ResultAsync<CreatedUser, Error> => {
-    return checkUserExists(model.username).andThen(() =>
-      ok({
-        ...model,
-        kind: 'Created' as const,
-      })
-    );
-  };
+  (getByUsername: GetByUsername): CreateUser =>
+  (model: ValidatedUser) =>
+    ok(model.username)
+      .asyncAndThen(getByUsername)
+      .andThen((user) => {
+        if (user) {
+          return err(new Error(`User with username "${user.username}" already exists`));
+        }
+
+        return ok({
+          ...model,
+          kind: 'Created' as const,
+        });
+      });
+
+// ====================
+// workflow
+// ====================
 
 export type CreateUserWorkFlow = (model: UnValidatedUser) => ResultAsync<CreatedUser, Error>;
 export const createUserWorkFlow =
-  (checkUserExists: CheckUserExists): CreateUserWorkFlow =>
+  (getByUsername: GetByUsername): CreateUserWorkFlow =>
   (model: UnValidatedUser) =>
-    ok(model).andThen(validateUser).asyncAndThen(createUser(checkUserExists));
+    ok(model).andThen(validateUser).asyncAndThen(createUser(getByUsername));
