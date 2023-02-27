@@ -7,7 +7,7 @@ import { getByUsername, saveUser } from '~/models/users/repository';
 import { ok } from 'neverthrow';
 
 export const action = async ({ request }: ActionArgs) => {
-  const workFlow = createUserWorkFlow(getByUsername);
+  const workFlow = createUserWorkFlow(getByUsername, saveUser);
 
   const form = await request.formData();
 
@@ -18,7 +18,7 @@ export const action = async ({ request }: ActionArgs) => {
     password: form.get('password') as string,
   };
 
-  const result = ok(input).asyncAndThen(workFlow).andThen(saveUser);
+  const result = ok(input).asyncAndThen(workFlow);
 
   return result.match(
     async (user) => {

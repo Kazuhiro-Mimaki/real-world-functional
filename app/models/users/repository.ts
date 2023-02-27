@@ -3,6 +3,7 @@ import { ok, okAsync, ResultAsync } from 'neverthrow';
 import { db } from '~/server/db.server';
 import { User } from './domain';
 import type { Password, UserName } from './vo';
+
 import type { CreatedUser } from './workflows/createUser';
 
 /**

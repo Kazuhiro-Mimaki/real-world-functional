@@ -2,7 +2,8 @@ import { err, Result } from 'neverthrow';
 import type { ResultAsync } from 'neverthrow';
 import { ok } from 'neverthrow';
 import { EmailAddress, Password, UserName } from '../vo';
-import type { GetByUsername } from '../repository';
+import type { GetByUsername, SaveUser } from '../repository';
+import type { User } from '../domain';
 
 // ====================
 // Type
@@ -71,11 +72,21 @@ export const createUser =
       });
 
 // ====================
+// step3
+// ====================
+
+export type SaveCreatedUser = (model: CreatedUser) => ResultAsync<User, Error>;
+export const saveCreatedUser =
+  (saveUser: SaveUser): SaveCreatedUser =>
+  (model: CreatedUser) =>
+    ok(model).asyncAndThen(saveUser);
+
+// ====================
 // workflow
 // ====================
 
-export type CreateUserWorkFlow = (model: UnValidatedUser) => ResultAsync<CreatedUser, Error>;
+export type CreateUserWorkFlow = (model: UnValidatedUser) => ResultAsync<User, Error>;
 export const createUserWorkFlow =
-  (getByUsername: GetByUsername): CreateUserWorkFlow =>
+  (getByUsername: GetByUsername, saveUser: SaveUser): CreateUserWorkFlow =>
   (model: UnValidatedUser) =>
-    ok(model).andThen(validateUser).asyncAndThen(createUser(getByUsername));
+    ok(model).andThen(validateUser).asyncAndThen(createUser(getByUsername)).andThen(saveCreatedUser(saveUser));
