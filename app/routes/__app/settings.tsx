@@ -1,8 +1,16 @@
 import type { ActionArgs, LoaderArgs } from '@remix-run/node';
+import { redirect } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { Form, useLoaderData } from '@remix-run/react';
+import { getByUserId, updateUser } from '~/models/users/repository';
+import { UserId } from '~/models/users/vo';
+import { updateUserWorkFlow } from '~/models/users/workflows/updateUser';
 import { db } from '~/server/db.server';
-import { getUserId } from '~/server/user';
+import { commitUserSession, createUserSession, getUserId } from '~/server/user';
+
+// ====================
+// loader
+// ====================
 
 export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);
@@ -18,12 +26,60 @@ export const loader = async ({ request }: LoaderArgs) => {
   return json({ user });
 };
 
+// ====================
+// action
+// ====================
+
 export const action = async ({ request }: ActionArgs) => {
-  console.log(request);
-  return null;
+  const workFlow = updateUserWorkFlow();
+
+  // const cookie = (await userPrefs.parse(cookieHeader)) || {};
+  // console.log(cookie)
+
+  const userId = await getUserId(request) as string;
+
+  const form = await request.formData();
+
+  const input = {
+    kind: 'UnValidated' as const,
+    username: form.get('username') as string,
+    email: form.get('email') as string,
+    password: form.get('password') as string,
+  };
+
+  const preprocess = UserId(userId)
+    .asyncAndThen(getByUserId)
+    .map((v) => ({
+      input: input,
+      user: v,
+    }));
+
+  const result = preprocess.andThen(workFlow).andThen(updateUser);
+
+  return result.match(
+    async (user) => {
+      const session = await createUserSession(user.id);
+      return redirect('/', {
+        headers: {
+          'Set-Cookie': await commitUserSession(session),
+        },
+      });
+    },
+    async (error) => {
+      return json({ errorMessage: error.message }, 400);
+    }
+  );
 };
 
+// ====================
+// component
+// ====================
+
 export default function UserSettings() {
+  // ====================
+  // loader
+  // ====================
+
   const { user } = useLoaderData<typeof loader>();
 
   return (
@@ -31,7 +87,6 @@ export default function UserSettings() {
       <div>
         <h1 className='text-4xl font-extralight'>Profile Settings</h1>
       </div>
-
       <Form method='post' action='/settings' className='w-full sm:w-10/12 md:w-8/12 lg:w-6/12'>
         <fieldset className='flex flex-col space-y-8 justify-center mx-auto' aria-live='polite'>
           <input
