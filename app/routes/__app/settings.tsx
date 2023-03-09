@@ -33,10 +33,7 @@ export const loader = async ({ request }: LoaderArgs) => {
 export const action = async ({ request }: ActionArgs) => {
   const workFlow = updateUserWorkFlow();
 
-  // const cookie = (await userPrefs.parse(cookieHeader)) || {};
-  // console.log(cookie)
-
-  const userId = await getUserId(request) as string;
+  const userId = (await getUserId(request)) as string;
 
   const form = await request.formData();
 
