@@ -12,9 +12,10 @@ import type { UpdatedUser } from './workflows/updateUser';
  */
 export type GetByUsername = (username: UserName) => ResultAsync<User | null, Error>;
 export const getByUsername: GetByUsername = (username: UserName) => {
-  return ResultAsync.fromPromise(db.user.findFirst({ where: { username } }), () => new Error('Prisma error')).andThen(
-    (user) => (user ? User(user) : okAsync(null))
-  );
+  return ResultAsync.fromPromise(db.user.findFirst({ where: { username } }), (e) => {
+    console.log(e);
+    return new Error('Prisma error');
+  }).andThen((user) => (user ? User(user) : okAsync(null)));
 };
 
 /**
@@ -41,7 +42,7 @@ export const saveUser: SaveUser = ({ username, email, password }: CreatedUser) =
       db.user.create({
         data: { username, email, password: passwordHash },
       }),
-      () => new Error('Prisma error')
+      () => new Error('Fail to save user in database')
     ).andThen((user) => User(user));
 
   return ok(password).asyncAndThen(createPasswordHash).andThen(saveUserToDB);

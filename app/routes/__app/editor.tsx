@@ -1,5 +1,6 @@
 import { Form, useActionData } from '@remix-run/react';
 import type { ActionArgs } from '@remix-run/node';
+import { redirect } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { getUserId } from '~/server/user';
 import { ok } from 'neverthrow';
@@ -25,7 +26,9 @@ export const action = async ({ request }: ActionArgs) => {
   const result = ok(input).asyncAndThen(workFlow);
 
   return result.match(
-    () => {},
+    async (_) => {
+      return redirect('/');
+    },
     async (error) => {
       return json({ errorMessage: error.message }, 400);
     }
