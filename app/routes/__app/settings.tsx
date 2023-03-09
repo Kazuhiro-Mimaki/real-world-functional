@@ -33,7 +33,7 @@ export const loader = async ({ request }: LoaderArgs) => {
 export const action = async ({ request }: ActionArgs) => {
   const workFlow = updateUserWorkFlow();
 
-  const userId = (await getUserId(request)) as string;
+  const userId = (await getUserId(request)) as number;
 
   const form = await request.formData();
 

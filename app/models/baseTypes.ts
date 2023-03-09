@@ -6,6 +6,12 @@ import { z } from 'zod';
 export type Branded<T, K> = T & { __brand: K };
 
 /**
+ * Constrained to be nonempty string
+ */
+export const NonemptyString = z.string().min(1);
+export type NonemptyString = Branded<z.infer<typeof NonemptyString>, 'NonemptyString'>;
+
+/**
  * Constrained to be 5 chars or less, not null
  */
 export const String5 = z.string().min(5);

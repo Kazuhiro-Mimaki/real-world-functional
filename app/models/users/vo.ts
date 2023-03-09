@@ -6,8 +6,8 @@ import { String5, Email } from '../baseTypes';
 /**
  * UserId
  */
-export type UserId = Branded<string, 'UserId'>;
-export const UserId = (input: string): Result<UserId, Error> => {
+export type UserId = Branded<number, 'UserId'>;
+export const UserId = (input: number): Result<UserId, Error> => {
   return ok(input as UserId);
 };
 

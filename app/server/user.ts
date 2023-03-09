@@ -22,7 +22,7 @@ const storage = createCookieSessionStorage({
   },
 });
 
-export const createUserSession = async (userId: string) => {
+export const createUserSession = async (userId: number) => {
   const session = await storage.getSession();
   session.set('userId', userId);
   return session;
@@ -39,7 +39,7 @@ export const getUserSession = async (request: Request) => {
 export async function getUserId(request: Request) {
   const session = await getUserSession(request);
   const userId = session.get('userId');
-  if (!userId || typeof userId !== 'string') return null;
+  if (!userId || typeof userId !== 'number') return null;
   return userId;
 }
 
