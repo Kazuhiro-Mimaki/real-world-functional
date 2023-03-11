@@ -1,6 +1,6 @@
 import { ResultAsync } from 'neverthrow';
 import { db } from '~/server/db.server';
-import { Article } from './domain';
+import { Article } from './model';
 import type { CreatedArticle } from './workflows/createArticle';
 
 /**

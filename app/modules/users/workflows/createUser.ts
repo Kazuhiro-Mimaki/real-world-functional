@@ -3,7 +3,7 @@ import type { ResultAsync } from 'neverthrow';
 import { ok } from 'neverthrow';
 import { EmailAddress, Password, UserName } from '../vo';
 import type { GetByUsername, SaveUser } from '../repository';
-import type { User } from '../domain';
+import type { User } from '../model';
 
 // ====================
 // Type

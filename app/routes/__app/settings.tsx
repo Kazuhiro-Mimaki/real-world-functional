@@ -2,9 +2,9 @@ import type { ActionArgs, LoaderArgs } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { Form, useLoaderData } from '@remix-run/react';
-import { getByUserId, updateUser } from '~/models/users/repository';
-import { UserId } from '~/models/users/vo';
-import { updateUserWorkFlow } from '~/models/users/workflows/updateUser';
+import { getByUserId, updateUser } from '~/modules/users/repository';
+import { UserId } from '~/modules/users/vo';
+import { updateUserWorkFlow } from '~/modules/users/workflows/updateUser';
 import { db } from '~/server/db.server';
 import { commitUserSession, createUserSession, getUserId } from '~/server/user';
 

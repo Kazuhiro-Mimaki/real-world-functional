@@ -4,8 +4,8 @@ import { redirect } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { getUserId } from '~/server/user';
 import { ok } from 'neverthrow';
-import { saveArticle } from '~/models/articles/repository';
-import { createArticleWorkFlow } from '~/models/articles/workflows/createArticle';
+import { saveArticle } from '~/modules/articles/repository';
+import { createArticleWorkFlow } from '~/modules/articles/workflows/createArticle';
 
 // ====================
 // action

@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { err, ok, okAsync, ResultAsync } from 'neverthrow';
 import { db } from '~/server/db.server';
-import { User } from './domain';
+import { User } from './model';
 import type { Password, UserId, UserName } from './vo';
 
 import type { CreatedUser } from './workflows/createUser';

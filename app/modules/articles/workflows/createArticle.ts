@@ -2,7 +2,7 @@ import { Result } from 'neverthrow';
 import type { ResultAsync } from 'neverthrow';
 import { ok } from 'neverthrow';
 import { Content, Title } from '../vo';
-import type { Article } from '../domain';
+import type { Article } from '../model';
 import { UserId } from '../../users/vo';
 import type { SaveArticle } from '../repository';
 

@@ -2,8 +2,8 @@ import { Form, Link, useActionData } from '@remix-run/react';
 import type { ActionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
 import { commitUserSession, createUserSession } from '~/server/user';
-import { createUserWorkFlow } from '~/models/users/workflows/createUser';
-import { getByUsername, saveUser } from '~/models/users/repository';
+import { createUserWorkFlow } from '~/modules/users/workflows/createUser';
+import { getByUsername, saveUser } from '~/modules/users/repository';
 import { ok } from 'neverthrow';
 
 export const action = async ({ request }: ActionArgs) => {
