@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { err, ok, okAsync, ResultAsync } from 'neverthrow';
-import { db } from '~/server/db.server';
+import { prisma } from '~/server/db.server';
 import { User } from './model';
 import type { Password, UserId, UserName } from './vo';
 
@@ -13,7 +13,7 @@ import type { UpdatedUser } from './workflows/updateUser';
 export type GetByUsername = (username: UserName) => ResultAsync<User | null, Error>;
 export const getByUsername: GetByUsername = (username: UserName) => {
   return ResultAsync.fromPromise(
-    db.user.findFirst({ where: { username } }),
+    prisma.user.findFirst({ where: { username } }),
     () => new Error('Fail to find user by username')
   ).andThen((user) => (user ? User(user) : okAsync(null)));
 };
@@ -24,7 +24,7 @@ export const getByUsername: GetByUsername = (username: UserName) => {
 export type GetByUserId = (userId: UserId) => ResultAsync<User, Error>;
 export const getByUserId: GetByUserId = (userId: UserId) => {
   return ResultAsync.fromPromise(
-    db.user.findFirst({ where: { id: userId } }),
+    prisma.user.findFirst({ where: { id: userId } }),
     () => new Error('Fail to find user by id')
   ).andThen((user) => (user ? User(user) : err(new Error('Cannot find user by id'))));
 };
@@ -39,7 +39,7 @@ export const saveUser: SaveUser = ({ username, email, password }: CreatedUser) =
 
   const saveUserToDB = (passwordHash: string): ResultAsync<User, Error> =>
     ResultAsync.fromPromise(
-      db.user.create({
+      prisma.user.create({
         data: { username, email, password: passwordHash },
       }),
       () => new Error('Fail to save user in database')
@@ -58,7 +58,7 @@ export const updateUser: UpdateUser = ({ id, username, email, password }: Update
 
   const updateUserById = (passwordHash: string): ResultAsync<User, Error> =>
     ResultAsync.fromPromise(
-      db.user.update({
+      prisma.user.update({
         where: { id },
         data: { username, email, password: passwordHash },
       }),

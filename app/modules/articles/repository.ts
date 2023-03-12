@@ -1,5 +1,5 @@
 import { Result, ResultAsync } from 'neverthrow';
-import { db } from '~/server/db.server';
+import { prisma } from '~/server/db.server';
 import { Article } from './model';
 import type { CreatedArticle } from './workflows/createArticle';
 
@@ -9,7 +9,7 @@ import type { CreatedArticle } from './workflows/createArticle';
 export type SaveArticle = (createdArticle: CreatedArticle) => ResultAsync<Article, Error>;
 export const saveArticle: SaveArticle = ({ title, content, userId }: CreatedArticle) => {
   return ResultAsync.fromPromise(
-    db.article.create({
+    prisma.article.create({
       data: { title, content, authorId: userId },
       include: {
         author: true,
@@ -25,7 +25,7 @@ export const saveArticle: SaveArticle = ({ title, content, userId }: CreatedArti
 export type ListArticles = () => ResultAsync<Article[], Error>;
 export const listArticles: ListArticles = () => {
   return ResultAsync.fromPromise(
-    db.article.findMany({
+    prisma.article.findMany({
       include: {
         author: true,
       },

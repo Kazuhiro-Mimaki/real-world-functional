@@ -5,7 +5,7 @@ import { Form, useLoaderData } from '@remix-run/react';
 import { getByUserId, updateUser } from '~/modules/users/repository';
 import { UserId } from '~/modules/users/vo';
 import { updateUserWorkFlow } from '~/modules/users/workflows/updateUser';
-import { db } from '~/server/db.server';
+import { prisma } from '~/server/db.server';
 import { commitUserSession, createUserSession, getUserId } from '~/server/user';
 
 // ====================
@@ -17,7 +17,7 @@ export const loader = async ({ request }: LoaderArgs) => {
   if (!userId) {
     throw new Response('Unauthorized', { status: 401 });
   }
-  const user = await db.user.findFirst({
+  const user = await prisma.user.findFirst({
     where: { id: userId },
   });
   if (!user) {
