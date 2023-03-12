@@ -20,10 +20,10 @@ export const saveArticle: SaveArticle = ({ title, content, userId }: CreatedArti
 };
 
 /**
- * get articles from db
+ * list articles from db
  */
-export type GetArticles = () => ResultAsync<Article[], Error>;
-export const getArticles: GetArticles = () => {
+export type ListArticles = () => ResultAsync<Article[], Error>;
+export const listArticles: ListArticles = () => {
   return ResultAsync.fromPromise(
     db.article.findMany({
       include: {

@@ -2,7 +2,7 @@ import type { LoaderArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { Header } from '~/components';
-import { getArticles } from '~/modules/articles/repository';
+import { listArticles } from '~/modules/articles/repository';
 import { getUserId } from '~/server/user';
 
 // ====================
@@ -15,7 +15,7 @@ export const loader = async ({ request }: LoaderArgs) => {
     throw new Response('Unauthorized', { status: 401 });
   }
 
-  const result = await getArticles();
+  const result = await listArticles();
   return result.match(
     (articles) => {
       return json({ articles: articles, errorMessage: '' }, 200);
