@@ -28,7 +28,7 @@ export const loader = async ({ request }: LoaderArgs) => {
 };
 
 // ====================
-// component
+// page
 // ====================
 
 export default function Index() {
@@ -49,6 +49,12 @@ export default function Index() {
                 </Link>
                 <h1 className='text-2xl font-semibold'>{article.title}</h1>
                 <p className='text-base font-light text-gray-500'>{article.content.substring(0, 500)}...</p>
+
+                <section>
+                  {article.tags.map((tag) => (
+                    <span key={tag.id}>{tag.name} / </span>
+                  ))}
+                </section>
               </article>
             ))}
           </section>

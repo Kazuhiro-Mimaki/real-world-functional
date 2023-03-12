@@ -1,4 +1,4 @@
-import { Form, useActionData } from '@remix-run/react';
+import { Form, useActionData, useFetcher } from '@remix-run/react';
 import type { ActionArgs } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { json } from '@remix-run/node';
@@ -7,6 +7,8 @@ import { ok } from 'neverthrow';
 import { saveArticle } from '~/modules/articles/repository';
 import { createArticleWorkFlow } from '~/modules/articles/workflows/createArticle';
 import { prisma } from '~/server/db.server';
+import type { ChangeEvent, KeyboardEvent } from 'react';
+import { useState } from 'react';
 
 // ====================
 // action
@@ -21,7 +23,7 @@ export const action = async ({ request }: ActionArgs) => {
     kind: 'UnValidated' as const,
     title: form.get('title') as string,
     content: form.get('content') as string,
-    tagNames: [] as string[],
+    tagNames: form.getAll('tagNames[]') as string[],
     authorId: (await getUserId(request)) as number,
   };
 
@@ -38,11 +40,74 @@ export const action = async ({ request }: ActionArgs) => {
 };
 
 // ====================
-// Page
+// page
 // ====================
 
 export default function Editor() {
+  // ====================
+  // remix api
+  // ====================
+
   const actionData = useActionData<typeof action>();
+  const fetcher = useFetcher();
+
+  // ====================
+  // state
+  // ====================
+
+  const [articleTitle, setArticleTitle] = useState('');
+  const [articleContent, setArticleContent] = useState('');
+  const [inputTagName, setInputTagName] = useState('');
+  const [tagNames, setTagNames] = useState<string[]>([]);
+
+  // ====================
+  // event handler
+  // ====================
+
+  const handleChangeArticleTitle = (e: ChangeEvent<HTMLInputElement>) => {
+    setArticleTitle(e.target.value);
+  };
+
+  const handleChangeArticleContent = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setArticleContent(e.target.value);
+  };
+
+  const handleSetInputTagName = (e: ChangeEvent<HTMLInputElement>) => {
+    setInputTagName(e.target.value);
+  };
+
+  const handleKeyDownEnterInTagArea = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      setTagNames((prev) => [...prev, inputTagName]);
+      clearInputTagName();
+    }
+  };
+
+  const handleClickDeleteTagButton = (targetIndex: number) => {
+    setTagNames((prev) => prev.filter((_, i) => i !== targetIndex));
+  };
+
+  const handleClickSubmit = () => {
+    const formData = new FormData();
+    formData.append('title', articleTitle);
+    formData.append('content', articleContent);
+    tagNames.forEach((v) => {
+      formData.append('tagNames[]', v);
+    });
+    fetcher.submit(formData, { action: '/editor', method: 'post' });
+  };
+
+  // ====================
+  // methods
+  // ====================
+
+  const clearInputTagName = () => {
+    setInputTagName('');
+  };
+
+  // ====================
+  // main
+  // ====================
 
   return (
     <div className='container flex flex-wrap flex-col space-y-8 items-center mx-auto pt-12'>
@@ -53,20 +118,50 @@ export default function Editor() {
           <input
             className='rounded-md border focus:outline-none focus:ring-4 focus:ring-opacity-50 appearance-none text-gray-900 bg-gray-50 border-gray-300 focus:border-primary focus:ring-primary-300 px-4 py-2.5'
             name='title'
+            value={articleTitle}
+            onChange={handleChangeArticleTitle}
             placeholder='Article Title'
             type='text'
           />
+
           <textarea
             className='rounded-md border focus:outline-none focus:ring-4 focus:ring-opacity-50 appearance-none text-gray-900 bg-gray-50 border-gray-300 focus:border-primary focus:ring-primary-300 px-4 py-2.5'
             name='content'
+            value={articleContent}
+            onChange={handleChangeArticleContent}
             placeholder='Write your article (in markdown)'
           />
+
+          <input
+            className='rounded-md border focus:outline-none focus:ring-4 focus:ring-opacity-50 appearance-none text-gray-900 bg-gray-50 border-gray-300 focus:border-primary focus:ring-primary-300 px-4 py-1'
+            name='tagName'
+            placeholder='Enter tags'
+            type='text'
+            value={inputTagName}
+            onChange={handleSetInputTagName}
+            onKeyDown={handleKeyDownEnterInTagArea}
+          />
+
+          <section>
+            {tagNames.map((tagName, i) => (
+              <span key={i} className='bg-gray-500 text-white py-1 px-2 rounded-full'>
+                {tagName}
+                <span className='ml-2 hover:cursor-pointer' onClick={() => handleClickDeleteTagButton(i)}>
+                  x
+                </span>
+              </span>
+            ))}
+          </section>
 
           <p className='text-red-500' role='alert'>
             {actionData?.errorMessage}
           </p>
 
-          <button type='submit' className='text-white bg-green-600 border-green-600 self-end px-5 py-2 rounded'>
+          <button
+            type='button'
+            onClick={handleClickSubmit}
+            className='text-white bg-green-600 hover:bg-green-700 border-green-600 self-end px-5 py-2 rounded'
+          >
             Publish Article
           </button>
         </fieldset>

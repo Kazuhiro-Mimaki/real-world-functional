@@ -20,6 +20,7 @@ export const saveArticle =
         },
         include: {
           author: true,
+          tags: true,
         },
       }),
       () => new Error('Fail to save article in database')
@@ -37,6 +38,7 @@ export const listArticles =
       prisma.article.findMany({
         include: {
           author: true,
+          tags: true,
         },
       }),
       () => new Error('Fail to get articles from database')
