@@ -26,6 +26,6 @@ model Article {
   content    String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  userId     Int
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  authorId   Int
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
 }

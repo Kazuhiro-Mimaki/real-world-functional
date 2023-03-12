@@ -12,10 +12,10 @@ import type { UpdatedUser } from './workflows/updateUser';
  */
 export type GetByUsername = (username: UserName) => ResultAsync<User | null, Error>;
 export const getByUsername: GetByUsername = (username: UserName) => {
-  return ResultAsync.fromPromise(db.user.findFirst({ where: { username } }), (e) => {
-    console.log(e);
-    return new Error('Prisma error');
-  }).andThen((user) => (user ? User(user) : okAsync(null)));
+  return ResultAsync.fromPromise(
+    db.user.findFirst({ where: { username } }),
+    () => new Error('Fail to find user by username')
+  ).andThen((user) => (user ? User(user) : okAsync(null)));
 };
 
 /**
@@ -25,7 +25,7 @@ export type GetByUserId = (userId: UserId) => ResultAsync<User, Error>;
 export const getByUserId: GetByUserId = (userId: UserId) => {
   return ResultAsync.fromPromise(
     db.user.findFirst({ where: { id: userId } }),
-    () => new Error('Cannot get user by id')
+    () => new Error('Fail to find user by id')
   ).andThen((user) => (user ? User(user) : err(new Error('Cannot find user by id'))));
 };
 
@@ -62,7 +62,7 @@ export const updateUser: UpdateUser = ({ id, username, email, password }: Update
         where: { id },
         data: { username, email, password: passwordHash },
       }),
-      () => new Error('Prisma error')
+      () => new Error('Fail to update user')
     ).andThen((user) => User(user));
 
   return ok(password).asyncAndThen(createPasswordHash).andThen(updateUserById);

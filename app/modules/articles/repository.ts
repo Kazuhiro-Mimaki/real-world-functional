@@ -1,4 +1,4 @@
-import { ResultAsync } from 'neverthrow';
+import { Result, ResultAsync } from 'neverthrow';
 import { db } from '~/server/db.server';
 import { Article } from './model';
 import type { CreatedArticle } from './workflows/createArticle';
@@ -10,8 +10,26 @@ export type SaveArticle = (createdArticle: CreatedArticle) => ResultAsync<Articl
 export const saveArticle: SaveArticle = ({ title, content, userId }: CreatedArticle) => {
   return ResultAsync.fromPromise(
     db.article.create({
-      data: { title, content, userId },
+      data: { title, content, authorId: userId },
+      include: {
+        author: true,
+      },
     }),
-    () => new Error('Prisma error')
+    () => new Error('Fail to save article in database')
   ).andThen((article) => Article(article));
+};
+
+/**
+ * get articles from db
+ */
+export type GetArticles = () => ResultAsync<Article[], Error>;
+export const getArticles: GetArticles = () => {
+  return ResultAsync.fromPromise(
+    db.article.findMany({
+      include: {
+        author: true,
+      },
+    }),
+    () => new Error('Fail to get articles from database')
+  ).andThen((articles) => Result.combine(articles.map((v) => Article(v))));
 };
