@@ -45,13 +45,13 @@ export const action = async ({ request }: ActionArgs) => {
   };
 
   const preprocess = UserId(userId)
-    .asyncAndThen(getByUserId)
+    .asyncAndThen(getByUserId(prisma))
     .map((v) => ({
       input: input,
       user: v,
     }));
 
-  const result = preprocess.andThen(workFlow).andThen(updateUser);
+  const result = preprocess.andThen(workFlow).andThen(updateUser(prisma));
 
   return result.match(
     async (user) => {

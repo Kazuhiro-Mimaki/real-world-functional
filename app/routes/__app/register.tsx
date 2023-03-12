@@ -5,9 +5,10 @@ import { commitUserSession, createUserSession } from '~/server/user';
 import { createUserWorkFlow } from '~/modules/users/workflows/createUser';
 import { getByUsername, saveUser } from '~/modules/users/repository';
 import { ok } from 'neverthrow';
+import { prisma } from '~/server/db.server';
 
 export const action = async ({ request }: ActionArgs) => {
-  const workFlow = createUserWorkFlow(getByUsername, saveUser);
+  const workFlow = createUserWorkFlow(getByUsername(prisma), saveUser(prisma));
 
   const form = await request.formData();
 

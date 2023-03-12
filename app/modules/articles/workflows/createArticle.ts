@@ -5,6 +5,7 @@ import { Content, Title } from '../vo';
 import type { Article } from '../model';
 import { UserId } from '../../users/vo';
 import type { SaveArticle } from '../repository';
+import { TagName } from '~/modules/tags/vo';
 
 // ====================
 // Type
@@ -14,21 +15,24 @@ type UnValidatedArticle = {
   kind: 'UnValidated';
   title: string;
   content: string;
-  userId: number;
+  tagNames: string[];
+  authorId: number;
 };
 
 type ValidatedArticle = {
   kind: 'Validated';
   title: Title;
   content: Content;
-  userId: UserId;
+  tagNames: TagName[];
+  authorId: UserId;
 };
 
 export type CreatedArticle = {
   kind: 'Created';
   title: Title;
   content: Content;
-  userId: UserId;
+  tagNames: TagName[];
+  authorId: UserId;
 };
 
 // ====================
@@ -36,18 +40,20 @@ export type CreatedArticle = {
 // ====================
 
 export type ValidateArticle = (model: UnValidatedArticle) => Result<ValidatedArticle, Error>;
-export const validateArticle = (model: UnValidatedArticle): Result<ValidatedArticle, Error> => {
+export const validateArticle: ValidateArticle = (model: UnValidatedArticle): Result<ValidatedArticle, Error> => {
   const title = Title(model.title);
   const content = Content(model.content);
-  const userId = UserId(model.userId);
+  const tagNames = Result.combine(model.tagNames.map((v) => TagName(v)));
+  const authorId = UserId(model.authorId);
 
-  const values = Result.combine([title, content, userId]);
+  const values = Result.combine([title, content, tagNames, authorId]);
 
-  return values.map(([title, content, userId]) => ({
+  return values.map(([title, content, tagNames, authorId]) => ({
     kind: 'Validated',
     title,
     content,
-    userId,
+    tagNames,
+    authorId,
   }));
 };
 
@@ -68,7 +74,7 @@ export const createArticle: CreateArticle = (model: ValidatedArticle) => {
 // ====================
 
 export type SaveCreatedArticle = (model: CreatedArticle) => ResultAsync<Article, Error>;
-export const saveCreatedUser =
+export const saveCreatedArticle =
   (saveArticle: SaveArticle): SaveCreatedArticle =>
   (model: CreatedArticle) =>
     ok(model).asyncAndThen(saveArticle);
@@ -81,4 +87,4 @@ export type CreateArticleWorkFlow = (model: UnValidatedArticle) => ResultAsync<A
 export const createArticleWorkFlow =
   (saveArticle: SaveArticle): CreateArticleWorkFlow =>
   (model: UnValidatedArticle) =>
-    ok(model).andThen(validateArticle).andThen(createArticle).asyncAndThen(saveArticle);
+    ok(model).andThen(validateArticle).andThen(createArticle).asyncAndThen(saveCreatedArticle(saveArticle));

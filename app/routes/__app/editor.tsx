@@ -6,13 +6,14 @@ import { getUserId } from '~/server/user';
 import { ok } from 'neverthrow';
 import { saveArticle } from '~/modules/articles/repository';
 import { createArticleWorkFlow } from '~/modules/articles/workflows/createArticle';
+import { prisma } from '~/server/db.server';
 
 // ====================
 // action
 // ====================
 
 export const action = async ({ request }: ActionArgs) => {
-  const workFlow = createArticleWorkFlow(saveArticle);
+  const workFlow = createArticleWorkFlow(saveArticle(prisma));
 
   const form = await request.formData();
 
@@ -20,7 +21,8 @@ export const action = async ({ request }: ActionArgs) => {
     kind: 'UnValidated' as const,
     title: form.get('title') as string,
     content: form.get('content') as string,
-    userId: (await getUserId(request)) as number,
+    tagNames: [] as string[],
+    authorId: (await getUserId(request)) as number,
   };
 
   const result = ok(input).asyncAndThen(workFlow);
