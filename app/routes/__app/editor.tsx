@@ -10,10 +10,6 @@ import { prisma } from '~/server/db.server';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { useState } from 'react';
 
-// ====================
-// action
-// ====================
-
 export const action = async ({ request }: ActionArgs) => {
   const workFlow = createArticleWorkFlow(saveArticle(prisma));
 
@@ -39,30 +35,14 @@ export const action = async ({ request }: ActionArgs) => {
   );
 };
 
-// ====================
-// page
-// ====================
-
 export default function Editor() {
-  // ====================
-  // remix api
-  // ====================
-
   const actionData = useActionData<typeof action>();
   const fetcher = useFetcher();
-
-  // ====================
-  // state
-  // ====================
 
   const [articleTitle, setArticleTitle] = useState('');
   const [articleContent, setArticleContent] = useState('');
   const [inputTagName, setInputTagName] = useState('');
   const [tagNames, setTagNames] = useState<string[]>([]);
-
-  // ====================
-  // event handler
-  // ====================
 
   const handleChangeArticleTitle = (e: ChangeEvent<HTMLInputElement>) => {
     setArticleTitle(e.target.value);
@@ -97,17 +77,9 @@ export default function Editor() {
     fetcher.submit(formData, { action: '/editor', method: 'post' });
   };
 
-  // ====================
-  // methods
-  // ====================
-
   const clearInputTagName = () => {
     setInputTagName('');
   };
-
-  // ====================
-  // main
-  // ====================
 
   return (
     <div className='container flex flex-wrap flex-col space-y-8 items-center mx-auto pt-12'>

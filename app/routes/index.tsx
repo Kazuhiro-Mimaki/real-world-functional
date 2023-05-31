@@ -6,10 +6,6 @@ import { listArticles } from '~/modules/articles/repository';
 import { prisma } from '~/server/db.server';
 import { getUserId } from '~/server/user';
 
-// ====================
-// loader
-// ====================
-
 export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);
   if (!userId) {
@@ -26,10 +22,6 @@ export const loader = async ({ request }: LoaderArgs) => {
     }
   );
 };
-
-// ====================
-// page
-// ====================
 
 export default function Index() {
   const { articles, errorMessage } = useLoaderData<typeof loader>();

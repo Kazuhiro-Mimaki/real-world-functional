@@ -8,10 +8,6 @@ import { updateUserWorkFlow } from '~/modules/users/workflows/updateUser';
 import { prisma } from '~/server/db.server';
 import { commitUserSession, createUserSession, getUserId } from '~/server/user';
 
-// ====================
-// loader
-// ====================
-
 export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);
   if (!userId) {
@@ -25,10 +21,6 @@ export const loader = async ({ request }: LoaderArgs) => {
   }
   return json({ user });
 };
-
-// ====================
-// action
-// ====================
 
 export const action = async ({ request }: ActionArgs) => {
   const workFlow = updateUserWorkFlow();
@@ -68,15 +60,7 @@ export const action = async ({ request }: ActionArgs) => {
   );
 };
 
-// ====================
-// component
-// ====================
-
 export default function UserSettings() {
-  // ====================
-  // loader
-  // ====================
-
   const { user } = useLoaderData<typeof loader>();
 
   return (
