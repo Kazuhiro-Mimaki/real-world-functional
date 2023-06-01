@@ -1,7 +1,7 @@
 import type { Result } from 'neverthrow';
 import { err, ok } from 'neverthrow';
-import type { Branded } from '../baseTypes';
-import { NonemptyString } from '../baseTypes';
+import type { Branded } from '../baseTypes.server';
+import { NonemptyString } from '../baseTypes.server';
 
 /**
  * TagId

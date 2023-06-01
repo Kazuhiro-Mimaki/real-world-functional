@@ -1,7 +1,7 @@
 import { Result } from 'neverthrow';
 import { ok } from 'neverthrow';
-import { EmailAddress, Password, UserName } from '../vo';
-import { User } from '../model';
+import { EmailAddress, Password, UserName } from '../vo.server';
+import { User } from '../model.server';
 
 // ====================
 // Type

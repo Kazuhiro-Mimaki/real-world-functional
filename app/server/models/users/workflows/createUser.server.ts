@@ -1,9 +1,9 @@
 import { err, Result } from 'neverthrow';
 import type { ResultAsync } from 'neverthrow';
 import { ok } from 'neverthrow';
-import { EmailAddress, Password, UserName } from '../vo';
-import type { GetByUsername, SaveUser } from '../repository';
-import type { User } from '../model';
+import { EmailAddress, Password, UserName } from '../vo.server';
+import type { GetByUsername, SaveUser } from '../repository.server';
+import type { User } from '../model.server';
 
 // ====================
 // Type

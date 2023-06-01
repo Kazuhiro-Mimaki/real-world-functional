@@ -2,9 +2,9 @@ import type { LoaderArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
 import { Header } from '~/components';
-import { listArticles } from '~/modules/articles/repository';
+import { listArticles } from '~/server/models/articles/repository.server';
 import { prisma } from '~/server/db.server';
-import { getUserId } from '~/server/user';
+import { getUserId } from '~/server/session.server';
 
 export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);

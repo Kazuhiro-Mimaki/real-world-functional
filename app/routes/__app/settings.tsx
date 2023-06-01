@@ -2,11 +2,11 @@ import type { ActionArgs, LoaderArgs } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { Form, useLoaderData } from '@remix-run/react';
-import { getByUserId, updateUser } from '~/modules/users/repository';
-import { UserId } from '~/modules/users/vo';
-import { updateUserWorkFlow } from '~/modules/users/workflows/updateUser';
+import { getByUserId, updateUser } from '~/server/models/users/repository.server';
+import { UserId } from '~/server/models/users/vo.server';
+import { updateUserWorkFlow } from '~/server/models/users/workflows/updateUser.server';
 import { prisma } from '~/server/db.server';
-import { commitUserSession, createUserSession, getUserId } from '~/server/user';
+import { commitUserSession, createUserSession, getUserId } from '~/server/session.server';
 
 export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);

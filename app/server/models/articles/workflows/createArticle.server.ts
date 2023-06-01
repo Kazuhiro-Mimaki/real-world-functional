@@ -1,11 +1,11 @@
 import { Result } from 'neverthrow';
 import type { ResultAsync } from 'neverthrow';
 import { ok } from 'neverthrow';
-import { Content, Title } from '../vo';
-import type { Article } from '../model';
-import { UserId } from '../../users/vo';
-import type { SaveArticle } from '../repository';
-import { TagName } from '~/modules/tags/vo';
+import { Content, Title } from '../vo.server';
+import type { Article } from '../model.server';
+import { UserId } from '../../users/vo.server';
+import type { SaveArticle } from '../repository.server';
+import { TagName } from '~/server/models/tags/vo.server';
 
 // ====================
 // Type

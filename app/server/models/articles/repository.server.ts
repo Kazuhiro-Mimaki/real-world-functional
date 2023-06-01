@@ -1,7 +1,7 @@
 import type { PrismaClient } from '@prisma/client';
 import { Result, ResultAsync } from 'neverthrow';
-import { Article } from './model';
-import type { CreatedArticle } from './workflows/createArticle';
+import { Article } from './model.server';
+import type { CreatedArticle } from './workflows/createArticle.server';
 
 /**
  * save article in db

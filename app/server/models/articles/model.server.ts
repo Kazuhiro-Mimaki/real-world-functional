@@ -1,8 +1,8 @@
 import type { Article as ArticlePrisma, User as UserPrisma, Tag as TagPrisma } from '@prisma/client';
 import { Result } from 'neverthrow';
-import { Tag } from '../tags/model';
-import { User } from '../users/model';
-import { ArticleId, Content, Title } from './vo';
+import { Tag } from '../tags/model.server';
+import { User } from '../users/model.server';
+import { ArticleId, Content, Title } from './vo.server';
 
 /**
  * Article

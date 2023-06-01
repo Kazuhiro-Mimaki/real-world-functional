@@ -1,6 +1,6 @@
 import type { Tag as TagPrisma } from '@prisma/client';
 import { Result } from 'neverthrow';
-import { TagId, TagName } from './vo';
+import { TagId, TagName } from './vo.server';
 
 /**
  * Tag

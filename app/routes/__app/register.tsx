@@ -1,9 +1,9 @@
 import { Form, Link, useActionData } from '@remix-run/react';
 import type { ActionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
-import { commitUserSession, createUserSession } from '~/server/user';
-import { createUserWorkFlow } from '~/modules/users/workflows/createUser';
-import { getByUsername, saveUser } from '~/modules/users/repository';
+import { commitUserSession, createUserSession } from '~/server/session.server';
+import { createUserWorkFlow } from '~/server/models/users/workflows/createUser.server';
+import { getByUsername, saveUser } from '~/server/models/users/repository.server';
 import { ok } from 'neverthrow';
 import { prisma } from '~/server/db.server';
 

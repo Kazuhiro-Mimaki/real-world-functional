@@ -1,11 +1,11 @@
 import type { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { err, ok, okAsync, ResultAsync } from 'neverthrow';
-import { User } from './model';
-import type { Password, UserId, UserName } from './vo';
+import { User } from './model.server';
+import type { Password, UserId, UserName } from './vo.server';
 
-import type { CreatedUser } from './workflows/createUser';
-import type { UpdatedUser } from './workflows/updateUser';
+import type { CreatedUser } from './workflows/createUser.server';
+import type { UpdatedUser } from './workflows/updateUser.server';
 
 /**
  * get user by username from db
