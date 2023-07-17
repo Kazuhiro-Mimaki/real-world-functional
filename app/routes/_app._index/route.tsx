@@ -3,14 +3,8 @@ import { json } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
 import { listArticles } from '~/server/models/articles/repository.server';
 import { prisma } from '~/server/db.server';
-import { getUserId } from '~/server/session.server';
 
 export const loader = async ({ request }: LoaderArgs) => {
-  const userId = await getUserId(request);
-  if (!userId) {
-    throw new Response('Unauthorized', { status: 401 });
-  }
-
   const result = await listArticles(prisma)();
   return result.match(
     (articles) => {
