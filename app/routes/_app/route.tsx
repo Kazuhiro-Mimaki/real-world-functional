@@ -8,6 +8,8 @@ export const loader = async ({ request }: LoaderArgs) => {
   if (!userId) {
     throw new Response('Unauthorized', { status: 401 });
   }
+
+  return null;
 };
 
 export default function __App() {

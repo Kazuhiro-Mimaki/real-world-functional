@@ -1,25 +1,25 @@
 import { Form, Link, useActionData } from '@remix-run/react';
-import type { ActionArgs } from '@remix-run/node';
-import { json, redirect } from '@remix-run/node';
+import { json, redirect, type ActionArgs } from '@remix-run/node';
 import { commitUserSession, createUserSession } from '~/server/session.server';
-import { createUserWorkFlow } from '~/server/models/users/workflows/createUser.server';
-import { getByUsername, saveUser } from '~/server/models/users/repository.server';
+import { createUserWorkFlow } from '~/server/workflow/user';
+import { saveUser } from '~/server/repository';
 import { ok } from 'neverthrow';
 import { prisma } from '~/server/db.server';
+import { getByEmail } from '~/server/service';
 
 export const action = async ({ request }: ActionArgs) => {
-  const workFlow = createUserWorkFlow(getByUsername(prisma), saveUser(prisma));
+  const workFlow = createUserWorkFlow(getByEmail({ prisma }));
 
   const form = await request.formData();
 
-  const input = {
+  const unValidatedUser = {
     kind: 'UnValidated' as const,
     username: form.get('username') as string,
     email: form.get('email') as string,
     password: form.get('password') as string,
   };
 
-  const result = ok(input).asyncAndThen(workFlow);
+  const result = ok(unValidatedUser).asyncAndThen(workFlow).andThen(saveUser({ prisma }));
 
   return result.match(
     async (user) => {

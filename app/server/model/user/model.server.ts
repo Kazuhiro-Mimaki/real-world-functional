@@ -1,7 +1,6 @@
 import type { User as UserModel } from '@prisma/client';
 import { Result } from 'neverthrow';
-import { Password } from './vo.server';
-import { UserId, UserName, EmailAddress } from './vo.server';
+import { UserId, UserName, EmailAddress, Password } from './vo.server';
 
 /**
  * User

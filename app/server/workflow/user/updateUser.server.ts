@@ -1,7 +1,6 @@
-import { Result } from 'neverthrow';
-import { ok } from 'neverthrow';
-import { EmailAddress, Password, UserName } from '../vo.server';
-import { User } from '../model.server';
+import { Result, ok } from 'neverthrow';
+import { EmailAddress, Password, UserName } from '~/server/model/user';
+import { User } from '~/server/model/user';
 
 // ====================
 // Type
@@ -36,11 +35,11 @@ export type UpdatedUser = User & {
 };
 
 // ====================
-// step1
+// workflow
 // ====================
 
-export type ValidateUserCommand = (model: UnValidatedUserCommand) => Result<ValidatedUserCommand, Error>;
-export const validateUserCommand: ValidateUserCommand = (model: UnValidatedUserCommand) => {
+type ValidateUserCommand = (model: UnValidatedUserCommand) => Result<ValidatedUserCommand, Error>;
+const validateUserCommand: ValidateUserCommand = (model: UnValidatedUserCommand) => {
   const { input, user } = model;
 
   const username = UserName(input.username);
@@ -62,12 +61,8 @@ export const validateUserCommand: ValidateUserCommand = (model: UnValidatedUserC
   }));
 };
 
-// ====================
-// step2
-// ====================
-
-export type UpdateUser = (model: ValidatedUserCommand) => Result<UpdatedUser, Error>;
-export const updateUser: UpdateUser = (model: ValidatedUserCommand) => {
+type UpdateUser = (model: ValidatedUserCommand) => Result<UpdatedUser, Error>;
+const updateUser: UpdateUser = (model: ValidatedUserCommand) => {
   const { input, user } = model;
 
   const updatedUser = User({
@@ -80,10 +75,6 @@ export const updateUser: UpdateUser = (model: ValidatedUserCommand) => {
   return updatedUser.map((v) => ({ ...v, kind: 'Updated' as const }));
 };
 
-// ====================
-// workflow
-// ====================
-
-export type UpdateUserWorkFlow = (model: UnValidatedUserCommand) => Result<UpdatedUser, Error>;
+type UpdateUserWorkFlow = (model: UnValidatedUserCommand) => Result<UpdatedUser, Error>;
 export const updateUserWorkFlow = (): UpdateUserWorkFlow => (model: UnValidatedUserCommand) =>
   ok(model).andThen(validateUserCommand).andThen(updateUser);

@@ -1,3 +1,4 @@
+import type { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 
 /**
@@ -22,3 +23,7 @@ export type String5 = Branded<z.infer<typeof String5>, 'String5'>;
  */
 export const Email = z.string().email();
 export type Email = Branded<z.infer<typeof Email>, 'Email'>;
+
+export type ApplicationContext = {
+  prisma: PrismaClient;
+};

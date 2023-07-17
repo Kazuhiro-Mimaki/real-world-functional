@@ -4,14 +4,14 @@ import { redirect } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { getUserId } from '~/server/session.server';
 import { ok } from 'neverthrow';
-import { saveArticle } from '~/server/models/articles/repository.server';
-import { createArticleWorkFlow } from '~/server/models/articles/workflows/createArticle.server';
+import { saveArticle } from '~/server/repository';
+import { createArticleWorkFlow } from '~/server/workflow/article';
 import { prisma } from '~/server/db.server';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { useState } from 'react';
 
 export const action = async ({ request }: ActionArgs) => {
-  const workFlow = createArticleWorkFlow(saveArticle(prisma));
+  const workFlow = createArticleWorkFlow();
 
   const form = await request.formData();
 
@@ -23,7 +23,7 @@ export const action = async ({ request }: ActionArgs) => {
     authorId: (await getUserId(request)) as number,
   };
 
-  const result = ok(input).asyncAndThen(workFlow);
+  const result = ok(input).andThen(workFlow).asyncAndThen(saveArticle({ prisma }));
 
   return result.match(
     async (_) => {

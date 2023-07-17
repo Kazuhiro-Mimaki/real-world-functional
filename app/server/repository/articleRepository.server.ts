@@ -1,14 +1,14 @@
-import type { PrismaClient } from '@prisma/client';
 import { Result, ResultAsync } from 'neverthrow';
-import { Article } from './model.server';
-import type { CreatedArticle } from './workflows/createArticle.server';
+import { Article } from '~/server/model/article/model.server';
+import type { CreatedArticle } from '~/server/workflow/article';
+import type { ApplicationContext } from '~/server/model/baseTypes.server';
 
 /**
- * save article in db
+ * save article
  */
 export type SaveArticle = (createdArticle: CreatedArticle) => ResultAsync<Article, Error>;
 export const saveArticle =
-  (prisma: PrismaClient): SaveArticle =>
+  ({ prisma }: ApplicationContext): SaveArticle =>
   ({ title, content, tagNames, authorId }: CreatedArticle) => {
     return ResultAsync.fromPromise(
       prisma.article.create({
@@ -23,16 +23,16 @@ export const saveArticle =
           tags: true,
         },
       }),
-      () => new Error('Fail to save article in database')
+      () => new Error('Prisma error')
     ).andThen((article) => Article(article));
   };
 
 /**
- * list articles from db
+ * find articles
  */
-export type ListArticles = () => ResultAsync<Article[], Error>;
-export const listArticles =
-  (prisma: PrismaClient): ListArticles =>
+export type FindArticles = () => ResultAsync<Article[], Error>;
+export const findArticles =
+  ({ prisma }: ApplicationContext): FindArticles =>
   () => {
     return ResultAsync.fromPromise(
       prisma.article.findMany({
@@ -41,6 +41,6 @@ export const listArticles =
           tags: true,
         },
       }),
-      () => new Error('Fail to get articles from database')
+      () => new Error('Prisma error')
     ).andThen((articles) => Result.combine(articles.map((v) => Article(v))));
   };

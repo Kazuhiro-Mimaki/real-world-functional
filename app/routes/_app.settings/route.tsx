@@ -1,12 +1,13 @@
 import type { ActionArgs, LoaderArgs } from '@remix-run/node';
-import { redirect } from '@remix-run/node';
-import { json } from '@remix-run/node';
+import { redirect, json } from '@remix-run/node';
 import { Form, useLoaderData } from '@remix-run/react';
-import { getByUserId, updateUser } from '~/server/models/users/repository.server';
-import { UserId } from '~/server/models/users/vo.server';
-import { updateUserWorkFlow } from '~/server/models/users/workflows/updateUser.server';
+import { updateUser } from '~/server/repository';
+import { UserId } from '~/server/model/user';
+import { updateUserWorkFlow } from '~/server/workflow/user';
 import { prisma } from '~/server/db.server';
 import { commitUserSession, createUserSession, getUserId } from '~/server/session.server';
+import { getByUserId } from '~/server/service';
+import { ok } from 'neverthrow';
 
 export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);
@@ -25,7 +26,7 @@ export const loader = async ({ request }: LoaderArgs) => {
 export const action = async ({ request }: ActionArgs) => {
   const workFlow = updateUserWorkFlow();
 
-  const userId = (await getUserId(request)) as number;
+  const userId = Number(await getUserId(request));
 
   const form = await request.formData();
 
@@ -37,13 +38,15 @@ export const action = async ({ request }: ActionArgs) => {
   };
 
   const preprocess = UserId(userId)
-    .asyncAndThen(getByUserId(prisma))
-    .map((v) => ({
-      input: input,
-      user: v,
-    }));
+    .asyncAndThen(getByUserId({ prisma }))
+    .andThen((user) =>
+      ok({
+        input: input,
+        user: user,
+      })
+    );
 
-  const result = preprocess.andThen(workFlow).andThen(updateUser(prisma));
+  const result = preprocess.andThen(workFlow).andThen(updateUser({ prisma }));
 
   return result.match(
     async (user) => {

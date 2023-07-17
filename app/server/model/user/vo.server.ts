@@ -16,8 +16,7 @@ export const UserId = (input: number): Result<UserId, Error> => {
  */
 export type UserName = Branded<string, 'UserName'>;
 export const UserName = (input: string): Result<UserName, Error> => {
-  const parsed = String5.safeParse(input);
-  return parsed.success ? ok(parsed.data as UserName) : err(new Error('UserName must be at least 5 characters long'));
+  return ok(input as UserName);
 };
 
 /**

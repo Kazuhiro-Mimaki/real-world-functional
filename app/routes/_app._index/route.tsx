@@ -1,11 +1,11 @@
 import type { LoaderArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
-import { listArticles } from '~/server/models/articles/repository.server';
+import { getArticles } from '~/server/service';
 import { prisma } from '~/server/db.server';
 
 export const loader = async ({ request }: LoaderArgs) => {
-  const result = await listArticles(prisma)();
+  const result = await getArticles({ prisma })();
   return result.match(
     (articles) => {
       return json({ articles: articles, errorMessage: '' }, 200);
