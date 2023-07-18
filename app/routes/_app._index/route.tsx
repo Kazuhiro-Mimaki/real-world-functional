@@ -1,14 +1,21 @@
-import type { LoaderArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
-import { Link, useLoaderData } from '@remix-run/react';
+import { useLoaderData } from '@remix-run/react';
 import { getArticles } from '~/server/service';
 import { prisma } from '~/server/db.server';
+import { Article } from '~/components';
+import { type Article as ArticleType } from '~/client/model';
 
-export const loader = async ({ request }: LoaderArgs) => {
+type LoaderType = {
+  articles: ArticleType[];
+  errorMessage: string;
+};
+
+export const loader = async () => {
   const result = await getArticles({ prisma })();
+
   return result.match(
     (articles) => {
-      return json({ articles: articles, errorMessage: '' }, 200);
+      return json({ articles, errorMessage: '' }, 200);
     },
     (error) => {
       return json({ articles: [], errorMessage: error.message }, 400);
@@ -17,36 +24,24 @@ export const loader = async ({ request }: LoaderArgs) => {
 };
 
 export default function Index() {
-  const { articles, errorMessage } = useLoaderData<typeof loader>();
+  const { articles, errorMessage } = useLoaderData<LoaderType>();
 
   return (
     <div className='flex container mx-auto my-8 gap-x-8'>
-      <section className='w-3/4'>
-        <section>global feed</section>
+      <div className='w-3/4'>
+        <div>global feed</div>
 
-        <section className='divide-y divide-slate-200'>
+        <div className='divide-y divide-slate-200'>
           {articles.map((article) => (
-            <article key={article.id} className='flex flex-col py-4'>
-              <Link to='/settings' className='text-green-500 hover:underline'>
-                {article.author.username}
-              </Link>
-              <h1 className='text-2xl font-semibold'>{article.title}</h1>
-              <p className='text-base font-light text-gray-500'>{article.content.substring(0, 500)}...</p>
-
-              <section>
-                {article.tags.map((tag) => (
-                  <span key={tag.id}>{tag.name} / </span>
-                ))}
-              </section>
-            </article>
+            <Article key={article.id} article={article} />
           ))}
-        </section>
-      </section>
+        </div>
+      </div>
 
-      <section className='bg-slate-100 w-1/4 h-fit'>
+      <div className='bg-slate-100 w-1/4 h-fit'>
         <h1>Popular Tags</h1>
         {/* TODO: list popular tags */}
-      </section>
+      </div>
     </div>
   );
 }

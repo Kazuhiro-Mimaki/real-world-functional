@@ -114,7 +114,7 @@ export default function Editor() {
             onKeyDown={handleKeyDownEnterInTagArea}
           />
 
-          <section>
+          <div>
             {tagNames.map((tagName, i) => (
               <span key={i} className='bg-gray-500 text-white py-1 px-2 rounded-full'>
                 {tagName}
@@ -123,7 +123,7 @@ export default function Editor() {
                 </span>
               </span>
             ))}
-          </section>
+          </div>
 
           <p className='text-red-500' role='alert'>
             {actionData?.errorMessage}
