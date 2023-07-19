@@ -1,10 +1,31 @@
-import { Form, useActionData } from '@remix-run/react';
-import type { ActionArgs } from '@remix-run/node';
+import { Form, useActionData, useLoaderData } from '@remix-run/react';
+import { json, type ActionArgs, type LoaderArgs } from '@remix-run/node';
 import { getUserIdFromSession } from '~/server/session.server';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { useState } from 'react';
 import { Button, ErrorMessage, Input, Textarea } from '~/components';
-import { serverAction } from './action.server';
+import type { Article } from '~/client/model';
+import { ArticleId } from '~/server/model/article';
+import { getArticle } from '~/server/service';
+import { prisma } from '~/server/db.server';
+
+type LoaderType = {
+  article: Article;
+  errorMessage: string;
+};
+
+export const loader = async ({ params }: LoaderArgs) => {
+  if (!params.slug) throw new Error('Article slug is required');
+
+  const result = ArticleId(Number(params.slug)).asyncAndThen(getArticle({ prisma }));
+
+  return result.match(
+    (article) => json({ article }, 200),
+    (error) => {
+      throw new Error(error.message);
+    }
+  );
+};
 
 export const action = async ({ request }: ActionArgs) => {
   const form = await request.formData();
@@ -17,21 +38,32 @@ export const action = async ({ request }: ActionArgs) => {
 
   const userId = await getUserIdFromSession(request);
 
-  return serverAction({ input, userId });
+  return { input, userId };
 };
 
 export default function Editor() {
+  const { article } = useLoaderData<LoaderType>();
   const actionData = useActionData<typeof action>();
 
+  const [articleTitle, setArticleTitle] = useState('');
+  const [articleContent, setArticleContent] = useState('');
   const [inputTagName, setInputTagName] = useState('');
   const [tagNames, setTagNames] = useState<string[]>([]);
+
+  const handleChangeArticleTitle = (e: ChangeEvent<HTMLInputElement>) => {
+    setArticleTitle(e.target.value);
+  };
+
+  const handleChangeArticleContent = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setArticleContent(e.target.value);
+  };
 
   const handleSetInputTagName = (e: ChangeEvent<HTMLInputElement>) => {
     setInputTagName(e.target.value);
   };
 
   const handleKeyDownEnterInTagArea = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.code === 'Space') {
+    if (e.key === 'Enter') {
       setTagNames((prev) => [...prev, inputTagName]);
       clearInputTagName();
     }
@@ -51,12 +83,24 @@ export default function Editor() {
 
       <Form method='post' action='/editor' className='w-full sm:w-10/12 md:w-8/12 lg:w-6/12'>
         <fieldset className='flex flex-col space-y-8 justify-center mx-auto' aria-live='polite'>
-          <Input type='text' name='title' placeholder='Article Title' />
+          <Input
+            type='text'
+            name='title'
+            placeholder='Article Title'
+            value={articleTitle}
+            onChange={handleChangeArticleTitle}
+          />
 
-          <Textarea name='content' placeholder='Write your article ' />
+          <Textarea
+            name='content'
+            placeholder='Write your article '
+            value={articleContent}
+            onChange={handleChangeArticleContent}
+          />
 
           <Input
             type='text'
+            name='tagName'
             placeholder='Enter tags'
             value={inputTagName}
             onChange={handleSetInputTagName}
@@ -70,12 +114,9 @@ export default function Editor() {
                 <span className='ml-2 hover:cursor-pointer' onClick={() => handleClickDeleteTagButton(i)}>
                   x
                 </span>
-                <Input type='hidden' name='tagNames[]' value={tagName} />
               </span>
             ))}
           </div>
-
-          {actionData?.errorMessage && <ErrorMessage>{actionData.errorMessage}</ErrorMessage>}
 
           <Button type='submit'>Publish Article</Button>
         </fieldset>

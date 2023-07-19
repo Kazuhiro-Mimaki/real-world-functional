@@ -7,7 +7,7 @@ type Props = {
 
 export const Article = ({ article }: Props) => {
   return (
-    <article key={article.id} className='flex flex-col py-4'>
+    <Link to={`/${article.id}`} className='flex flex-col py-4'>
       <Link to='/settings' className='text-green-500 hover:underline'>
         {article.author.username}
       </Link>
@@ -19,6 +19,6 @@ export const Article = ({ article }: Props) => {
           <span key={tag.id}>{tag.name} / </span>
         ))}
       </div>
-    </article>
+    </Link>
   );
 };

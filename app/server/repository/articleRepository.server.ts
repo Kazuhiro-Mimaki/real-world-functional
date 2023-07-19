@@ -1,7 +1,8 @@
-import { Result, ResultAsync } from 'neverthrow';
+import { Result, ResultAsync, ok } from 'neverthrow';
 import { Article } from '~/server/model/article/model.server';
 import type { CreatedArticle } from '~/server/workflow/article';
 import type { ApplicationContext } from '~/server/model/baseTypes.server';
+import type { ArticleId } from '~/server/model/article';
 
 /**
  * save article
@@ -43,4 +44,23 @@ export const findArticles =
       }),
       () => new Error('Prisma error')
     ).andThen((articles) => Result.combine(articles.map((v) => Article(v))));
+  };
+
+/**
+ * find article
+ */
+export type FindArticle = (articleId: ArticleId) => ResultAsync<Article | null, Error>;
+export const findArticle =
+  ({ prisma }: ApplicationContext): FindArticle =>
+  (articleId: ArticleId) => {
+    return ResultAsync.fromPromise(
+      prisma.article.findFirst({
+        where: { id: articleId },
+        include: {
+          author: true,
+          tags: true,
+        },
+      }),
+      () => new Error('Prisma error')
+    ).andThen((article) => (article ? Article(article) : ok(null)));
   };
