@@ -9,7 +9,7 @@ import { createArticleWorkFlow } from '~/server/workflow/article';
 import { prisma } from '~/server/db.server';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { useState } from 'react';
-import { Button, Input, Textarea } from '~/components';
+import { Button, ErrorMessage, Input, Textarea } from '~/components';
 
 export const action = async ({ request }: ActionArgs) => {
   const workFlow = createArticleWorkFlow();
@@ -123,9 +123,7 @@ export default function Editor() {
             ))}
           </div>
 
-          <p className='text-red-500' role='alert'>
-            {actionData?.errorMessage}
-          </p>
+          {actionData?.errorMessage && <ErrorMessage>{actionData.errorMessage}</ErrorMessage>}
 
           <Button type='button' onClick={handleClickSubmit}>
             Publish Article

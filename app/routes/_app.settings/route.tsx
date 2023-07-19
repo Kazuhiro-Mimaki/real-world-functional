@@ -9,6 +9,11 @@ import { commitUserSession, createUserSession, getUserId } from '~/server/sessio
 import { getByUserId } from '~/server/service';
 import { ok } from 'neverthrow';
 import { Button, Input } from '~/components';
+import type { User } from '~/client/model';
+
+type LoaderType = {
+  user: User;
+};
 
 export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);
@@ -65,7 +70,7 @@ export const action = async ({ request }: ActionArgs) => {
 };
 
 export default function UserSettings() {
-  const { user } = useLoaderData<typeof loader>();
+  const { user } = useLoaderData<LoaderType>();
 
   return (
     <div className='container flex flex-wrap flex-col space-y-8 items-center mx-auto pt-12'>

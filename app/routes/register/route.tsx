@@ -6,7 +6,7 @@ import { saveUser } from '~/server/repository';
 import { ok } from 'neverthrow';
 import { prisma } from '~/server/db.server';
 import { getByEmail } from '~/server/service';
-import { Button, Input } from '~/components';
+import { Button, ErrorMessage, Input } from '~/components';
 
 export const action = async ({ request }: ActionArgs) => {
   const workFlow = createUserWorkFlow(getByEmail({ prisma }));
@@ -55,9 +55,7 @@ export default function Register() {
           <Input type='text' name='email' placeholder='Email' />
           <Input type='password' name='password' placeholder='Password' />
 
-          <p className='text-red-500' role='alert'>
-            {actionData?.errorMessage}
-          </p>
+          {actionData?.errorMessage && <ErrorMessage>{actionData.errorMessage}</ErrorMessage>}
 
           <Button type='submit'>Sign up</Button>
         </fieldset>
