@@ -9,7 +9,7 @@ import { createArticleWorkFlow } from '~/server/workflow/article';
 import { prisma } from '~/server/db.server';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { useState } from 'react';
-import { Input } from '~/components';
+import { Input, Textarea } from '~/components';
 
 export const action = async ({ request }: ActionArgs) => {
   const workFlow = createArticleWorkFlow();
@@ -96,12 +96,11 @@ export default function Editor() {
             onChange={handleChangeArticleTitle}
           />
 
-          <textarea
-            className='rounded-md border focus:outline-none focus:ring-4 focus:ring-opacity-50 appearance-none text-gray-900 bg-gray-50 border-gray-300 focus:border-primary focus:ring-primary-300 px-4 py-2.5'
+          <Textarea
             name='content'
+            placeholder='Write your article '
             value={articleContent}
             onChange={handleChangeArticleContent}
-            placeholder='Write your article (in markdown)'
           />
 
           <Input
