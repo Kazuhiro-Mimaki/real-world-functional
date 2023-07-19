@@ -36,7 +36,7 @@ export type CreatedArticle = {
 // ====================
 
 type ValidateArticle = (model: UnValidatedArticle) => Result<ValidatedArticle, Error>;
-const validateArticle: ValidateArticle = (model: UnValidatedArticle): Result<ValidatedArticle, Error> => {
+const validateArticle: ValidateArticle = (model: UnValidatedArticle) => {
   const title = Title(model.title);
   const content = Content(model.content);
   const tagNames = Result.combine(model.tagNames.map((v) => TagName(v)));

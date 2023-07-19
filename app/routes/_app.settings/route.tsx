@@ -1,22 +1,22 @@
 import type { ActionArgs, LoaderArgs } from '@remix-run/node';
-import { redirect, json } from '@remix-run/node';
+import { json } from '@remix-run/node';
 import { Form, useActionData, useLoaderData } from '@remix-run/react';
-import { updateUser } from '~/server/repository';
 import { UserId } from '~/server/model/user';
-import { updateUserWorkFlow } from '~/server/workflow/user';
 import { prisma } from '~/server/db.server';
-import { commitUserSession, createUserSession, getUserIdFromSession } from '~/server/session.server';
+import { getUserIdFromSession } from '~/server/session.server';
 import { getByUserId } from '~/server/service';
-import { ok } from 'neverthrow';
 import { Button, ErrorMessage, Input } from '~/components';
 import type { User } from '~/client/model';
+import { serverAction } from './action.server';
 
 type LoaderType = {
   user: User;
 };
 
 export const loader = async ({ request }: LoaderArgs) => {
-  const result = getUserIdFromSession(request).andThen(UserId).andThen(getByUserId({ prisma }));
+  const userId = await getUserIdFromSession(request);
+
+  const result = UserId(userId).asyncAndThen(getByUserId({ prisma }));
 
   return result.match(
     (user) => json({ user }),
@@ -27,41 +27,17 @@ export const loader = async ({ request }: LoaderArgs) => {
 };
 
 export const action = async ({ request }: ActionArgs) => {
-  const workFlow = updateUserWorkFlow();
-
   const form = await request.formData();
 
   const input = {
-    kind: 'UnValidated' as const,
     username: form.get('username') as string,
     email: form.get('email') as string,
     password: form.get('password') as string,
   };
 
-  const preprocess = getUserIdFromSession(request)
-    .andThen(getByUserId({ prisma }))
-    .andThen((user) =>
-      ok({
-        input: input,
-        user: user,
-      })
-    );
+  const userId = await getUserIdFromSession(request);
 
-  const result = preprocess
-    .andThen(workFlow)
-    .andThen(updateUser({ prisma }))
-    .andThen((user) => createUserSession(user.id))
-    .andThen(commitUserSession);
-
-  return result.match(
-    (cookie) =>
-      redirect('/', {
-        headers: {
-          'Set-Cookie': cookie,
-        },
-      }),
-    (error) => json({ errorMessage: error.message }, 400)
-  );
+  return serverAction({ input, userId });
 };
 
 export default function UserSettings() {

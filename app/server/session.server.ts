@@ -1,8 +1,7 @@
 import type { Session, SessionData } from '@remix-run/node';
 import { createCookieSessionStorage } from '@remix-run/node';
-import { ResultAsync, err, ok } from 'neverthrow';
+import { ResultAsync, ok } from 'neverthrow';
 import type { Branded } from './model/baseTypes.server';
-import { UserId } from './model/user';
 
 type SessionType = Session<SessionData, SessionData>;
 type Cookie = Branded<string, 'Cookie'>;
@@ -39,12 +38,15 @@ export const commitUserSession = (session: Session): ResultAsync<Cookie, Error> 
     () => new Error('Failed to commit session')
   );
 
-const getUserSession = (headers: Headers): ResultAsync<SessionType, Error> =>
-  ResultAsync.fromPromise(storage.getSession(headers.get('Cookie')), () => new Error('Failed to commit session'));
+const getUserSession = async (headers: Headers) => {
+  return await storage.getSession(headers.get('Cookie'));
+};
 
-export const getUserIdFromSession = (request: Request): ResultAsync<UserId, Error> =>
-  getUserSession(request.headers).andThen((session) => {
-    const userId = session.get('userId');
-    if (!userId || typeof userId !== 'number') return err(new Error('Unauthorized'));
-    return UserId(userId);
-  });
+export const getUserIdFromSession = async (request: Request) => {
+  const session = await getUserSession(request.headers);
+  const userId = session.get('userId');
+  if (!userId || typeof userId !== 'number') {
+    throw new Error('Unauthorized');
+  }
+  return userId;
+};

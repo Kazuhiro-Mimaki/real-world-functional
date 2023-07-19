@@ -1,36 +1,23 @@
 import { Form, useActionData } from '@remix-run/react';
 import type { ActionArgs } from '@remix-run/node';
-import { redirect } from '@remix-run/node';
-import { json } from '@remix-run/node';
 import { getUserIdFromSession } from '~/server/session.server';
-import { ok } from 'neverthrow';
-import { saveArticle } from '~/server/repository';
-import { createArticleWorkFlow } from '~/server/workflow/article';
-import { prisma } from '~/server/db.server';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { useState } from 'react';
 import { Button, ErrorMessage, Input, Textarea } from '~/components';
+import { serverAction } from './action.server';
 
 export const action = async ({ request }: ActionArgs) => {
-  const workFlow = createArticleWorkFlow();
-
   const form = await request.formData();
 
-  const formData = {
+  const input = {
     title: form.get('title') as string,
     content: form.get('content') as string,
     tagNames: form.getAll('tagNames[]') as string[],
   };
 
-  const result = getUserIdFromSession(request)
-    .andThen((userId) => ok({ kind: 'UnValidated' as const, ...formData, authorId: userId }))
-    .andThen(workFlow)
-    .andThen(saveArticle({ prisma }));
+  const userId = await getUserIdFromSession(request);
 
-  return result.match(
-    (_) => redirect('/'),
-    (error) => json({ errorMessage: error.message }, 400)
-  );
+  return serverAction({ input, userId });
 };
 
 export default function Editor() {
