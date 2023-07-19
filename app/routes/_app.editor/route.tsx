@@ -1,4 +1,4 @@
-import { Form, useActionData, useFetcher } from '@remix-run/react';
+import { Form, useActionData } from '@remix-run/react';
 import type { ActionArgs } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { json } from '@remix-run/node';
@@ -16,15 +16,14 @@ export const action = async ({ request }: ActionArgs) => {
 
   const form = await request.formData();
 
-  const input = {
-    kind: 'UnValidated' as const,
+  const formData = {
     title: form.get('title') as string,
     content: form.get('content') as string,
     tagNames: form.getAll('tagNames[]') as string[],
   };
 
   const result = getUserIdFromSession(request)
-    .andThen((userId) => ok({ ...input, authorId: userId }))
+    .andThen((userId) => ok({ kind: 'UnValidated' as const, ...formData, authorId: userId }))
     .andThen(workFlow)
     .andThen(saveArticle({ prisma }));
 
@@ -36,7 +35,6 @@ export const action = async ({ request }: ActionArgs) => {
 
 export default function Editor() {
   const actionData = useActionData<typeof action>();
-  const fetcher = useFetcher();
 
   const [articleTitle, setArticleTitle] = useState('');
   const [articleContent, setArticleContent] = useState('');
@@ -64,16 +62,6 @@ export default function Editor() {
 
   const handleClickDeleteTagButton = (targetIndex: number) => {
     setTagNames((prev) => prev.filter((_, i) => i !== targetIndex));
-  };
-
-  const handleClickSubmit = () => {
-    const formData = new FormData();
-    formData.append('title', articleTitle);
-    formData.append('content', articleContent);
-    tagNames.forEach((v) => {
-      formData.append('tagNames[]', v);
-    });
-    fetcher.submit(formData, { action: '/editor', method: 'post' });
   };
 
   const clearInputTagName = () => {
@@ -123,9 +111,7 @@ export default function Editor() {
 
           {actionData?.errorMessage && <ErrorMessage>{actionData.errorMessage}</ErrorMessage>}
 
-          <Button type='button' onClick={handleClickSubmit}>
-            Publish Article
-          </Button>
+          <Button type='submit'>Publish Article</Button>
         </fieldset>
       </Form>
     </div>

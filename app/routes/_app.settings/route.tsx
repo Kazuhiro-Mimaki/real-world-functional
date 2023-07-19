@@ -1,6 +1,6 @@
 import type { ActionArgs, LoaderArgs } from '@remix-run/node';
 import { redirect, json } from '@remix-run/node';
-import { Form, useLoaderData } from '@remix-run/react';
+import { Form, useActionData, useLoaderData } from '@remix-run/react';
 import { updateUser } from '~/server/repository';
 import { UserId } from '~/server/model/user';
 import { updateUserWorkFlow } from '~/server/workflow/user';
@@ -8,7 +8,7 @@ import { prisma } from '~/server/db.server';
 import { commitUserSession, createUserSession, getUserIdFromSession } from '~/server/session.server';
 import { getByUserId } from '~/server/service';
 import { ok } from 'neverthrow';
-import { Button, Input } from '~/components';
+import { Button, ErrorMessage, Input } from '~/components';
 import type { User } from '~/client/model';
 
 type LoaderType = {
@@ -66,6 +66,7 @@ export const action = async ({ request }: ActionArgs) => {
 
 export default function UserSettings() {
   const { user } = useLoaderData<LoaderType>();
+  const actionData = useActionData<typeof action>();
 
   return (
     <div className='container flex flex-wrap flex-col space-y-8 items-center mx-auto pt-12'>
@@ -78,6 +79,8 @@ export default function UserSettings() {
           <Input type='text' name='username' defaultValue={user.username} placeholder='Username' />
           <Input type='text' name='email' defaultValue={user.email} placeholder='Email' />
           <Input type='password' name='password' placeholder='Password' />
+
+          {actionData?.errorMessage && <ErrorMessage>{actionData.errorMessage}</ErrorMessage>}
 
           <Button type='submit'>Update settings</Button>
         </fieldset>
