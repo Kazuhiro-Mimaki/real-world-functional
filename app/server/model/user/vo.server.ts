@@ -1,7 +1,7 @@
 import type { Result } from 'neverthrow';
 import { err, ok } from 'neverthrow';
 import type { Branded } from '../baseTypes.server';
-import { String5, Email } from '../baseTypes.server';
+import { String5, Email, NonemptyString } from '../baseTypes.server';
 
 /**
  * UserId
@@ -16,7 +16,8 @@ export const UserId = (input: number): Result<UserId, Error> => {
  */
 export type UserName = Branded<string, 'UserName'>;
 export const UserName = (input: string): Result<UserName, Error> => {
-  return ok(input as UserName);
+  const parsed = NonemptyString.safeParse(input);
+  return parsed.success ? ok(parsed.data as UserName) : err(new Error('Username must be at least 1 character long'));
 };
 
 /**

@@ -32,13 +32,13 @@ export type CreatedUser = {
 // workflow
 // ====================
 
-type ValidateUser = (model: UnValidatedUser) => Result<ValidatedUser, Error>;
+type ValidateUser = (model: UnValidatedUser) => Result<ValidatedUser, Error[]>;
 const validateUser: ValidateUser = (model: UnValidatedUser) => {
   const username = UserName(model.username);
   const email = EmailAddress(model.email);
   const password = Password(model.password);
 
-  const values = Result.combine([username, email, password]);
+  const values = Result.combineWithAllErrors([username, email, password]);
 
   return values.map(([username, email, password]) => ({
     kind: 'Validated',
@@ -65,7 +65,7 @@ const createUser =
         });
       });
 
-type CreateUserWorkFlow = (model: UnValidatedUser) => ResultAsync<CreatedUser, Error>;
+type CreateUserWorkFlow = (model: UnValidatedUser) => ResultAsync<CreatedUser, Error | Error[]>;
 export const createUserWorkFlow =
   (findByEmail: FindByEmail): CreateUserWorkFlow =>
   (model: UnValidatedUser) =>

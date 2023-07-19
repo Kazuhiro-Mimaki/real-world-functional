@@ -32,7 +32,15 @@ export const action = async ({ request }: ActionArgs) => {
       });
     },
     async (error) => {
-      return json({ errorMessage: error.message }, 400);
+      const errorMessages: string[] = [];
+      if (error instanceof Error) {
+        errorMessages.push(error.message);
+      } else {
+        error.forEach((err) => {
+          errorMessages.push(err.message);
+        });
+      }
+      return json({ errorMessages }, 400);
     }
   );
 };
@@ -55,10 +63,11 @@ export default function Register() {
           <Input type='text' name='email' placeholder='Email' />
           <Input type='password' name='password' placeholder='Password' />
 
-          {actionData?.errorMessage && <ErrorMessage>{actionData.errorMessage}</ErrorMessage>}
-
           <Button type='submit'>Sign up</Button>
         </fieldset>
+
+        {actionData?.errorMessages &&
+          actionData.errorMessages.map((err, i) => <ErrorMessage key={i}>{err}</ErrorMessage>)}
       </Form>
     </div>
   );
