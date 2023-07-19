@@ -1,7 +1,6 @@
 import type { Session, SessionData } from '@remix-run/node';
 import { createCookieSessionStorage } from '@remix-run/node';
 import { ResultAsync, ok } from 'neverthrow';
-import type { Branded } from './model/baseTypes.server';
 
 type SessionType = Session<SessionData, SessionData>;
 type Cookie = Branded<string, 'Cookie'>;

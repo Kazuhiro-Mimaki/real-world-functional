@@ -1,6 +1,5 @@
 import type { Result } from 'neverthrow';
 import { err, ok } from 'neverthrow';
-import type { Branded } from '../baseTypes.server';
 import { String5, Email, NonemptyString } from '../baseTypes.server';
 
 /**

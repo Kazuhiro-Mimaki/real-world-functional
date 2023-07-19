@@ -2,11 +2,6 @@ import type { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 
 /**
- * Branded type
- */
-export type Branded<T, K> = T & { __brand: K };
-
-/**
  * Constrained to be nonempty string
  */
 export const NonemptyString = z.string().min(1);
