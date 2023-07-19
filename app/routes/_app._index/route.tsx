@@ -15,16 +15,16 @@ export const loader = async () => {
 
   return result.match(
     (articles) => {
-      return json({ articles, errorMessage: '' }, 200);
+      return json({ articles }, 200);
     },
     (error) => {
-      return json({ articles: [], errorMessage: error.message }, 400);
+      throw new Error(error.message);
     }
   );
 };
 
 export default function Index() {
-  const { articles, errorMessage } = useLoaderData<LoaderType>();
+  const { articles } = useLoaderData<LoaderType>();
 
   return (
     <div className='flex container mx-auto my-8 gap-x-8'>
