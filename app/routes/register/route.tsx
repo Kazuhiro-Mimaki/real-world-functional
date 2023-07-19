@@ -6,6 +6,7 @@ import { saveUser } from '~/server/repository';
 import { ok } from 'neverthrow';
 import { prisma } from '~/server/db.server';
 import { getByEmail } from '~/server/service';
+import { Input } from '~/components';
 
 export const action = async ({ request }: ActionArgs) => {
   const workFlow = createUserWorkFlow(getByEmail({ prisma }));
@@ -50,24 +51,9 @@ export default function Register() {
 
       <Form method='post' action='/register' className='w-full sm:w-10/12 md:w-8/12 lg:w-6/12'>
         <fieldset className='flex flex-col space-y-8 justify-center mx-auto' aria-live='polite'>
-          <input
-            className='rounded-md border focus:outline-none focus:ring-4 focus:ring-opacity-50 appearance-none text-gray-900 bg-gray-50 border-gray-300 focus:border-primary focus:ring-primary-300 px-4 py-2.5'
-            name='username'
-            placeholder='Username'
-            type='text'
-          />
-          <input
-            className='rounded-md border focus:outline-none focus:ring-4 focus:ring-opacity-50 appearance-none text-gray-900 bg-gray-50 border-gray-300 focus:border-primary focus:ring-primary-300 px-4 py-2.5'
-            name='email'
-            placeholder='Email'
-            type='text'
-          />
-          <input
-            className='rounded-md border focus:outline-none focus:ring-4 focus:ring-opacity-50 appearance-none text-gray-900 bg-gray-50 border-gray-300 focus:border-primary focus:ring-primary-300 px-4 py-2.5'
-            name='password'
-            placeholder='Password'
-            type='password'
-          />
+          <Input type='text' name='username' placeholder='Username' />
+          <Input type='text' name='email' placeholder='Email' />
+          <Input type='password' name='password' placeholder='Password' />
 
           <p className='text-red-500' role='alert'>
             {actionData?.errorMessage}

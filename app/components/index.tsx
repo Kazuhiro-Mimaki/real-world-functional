@@ -1,2 +1,2 @@
-export { Header } from './shared';
+export { Header, Input } from './shared';
 export { Article } from './article';

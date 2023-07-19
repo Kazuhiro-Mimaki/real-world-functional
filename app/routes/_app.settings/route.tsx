@@ -8,6 +8,7 @@ import { prisma } from '~/server/db.server';
 import { commitUserSession, createUserSession, getUserId } from '~/server/session.server';
 import { getByUserId } from '~/server/service';
 import { ok } from 'neverthrow';
+import { Input } from '~/components';
 
 export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);
@@ -71,28 +72,12 @@ export default function UserSettings() {
       <div>
         <h1 className='text-4xl font-extralight'>Profile Settings</h1>
       </div>
+
       <Form method='post' action='/settings' className='w-full sm:w-10/12 md:w-8/12 lg:w-6/12'>
         <fieldset className='flex flex-col space-y-8 justify-center mx-auto' aria-live='polite'>
-          <input
-            className='rounded-md border focus:outline-none focus:ring-4 focus:ring-opacity-50 appearance-none text-gray-900 bg-gray-50 border-gray-300 focus:border-primary focus:ring-primary-300 px-4 py-2.5'
-            name='username'
-            defaultValue={user.username}
-            placeholder='Username'
-            type='text'
-          />
-          <input
-            className='rounded-md border focus:outline-none focus:ring-4 focus:ring-opacity-50 appearance-none text-gray-900 bg-gray-50 border-gray-300 focus:border-primary focus:ring-primary-300 px-4 py-2.5'
-            name='email'
-            defaultValue={user.email}
-            placeholder='Email'
-            type='text'
-          />
-          <input
-            className='rounded-md border focus:outline-none focus:ring-4 focus:ring-opacity-50 appearance-none text-gray-900 bg-gray-50 border-gray-300 focus:border-primary focus:ring-primary-300 px-4 py-2.5'
-            name='password'
-            placeholder='New password'
-            type='password'
-          />
+          <Input type='text' name='username' defaultValue={user.username} placeholder='Username' />
+          <Input type='text' name='email' defaultValue={user.email} placeholder='Email' />
+          <Input type='password' name='password' placeholder='Password' />
 
           <button type='submit' className='text-white bg-green-600 border-green-600 self-end px-5 py-2 rounded'>
             Update settings

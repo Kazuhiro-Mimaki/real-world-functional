@@ -9,6 +9,7 @@ import { createArticleWorkFlow } from '~/server/workflow/article';
 import { prisma } from '~/server/db.server';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { useState } from 'react';
+import { Input } from '~/components';
 
 export const action = async ({ request }: ActionArgs) => {
   const workFlow = createArticleWorkFlow();
@@ -87,13 +88,12 @@ export default function Editor() {
 
       <Form method='post' action='/editor' className='w-full sm:w-10/12 md:w-8/12 lg:w-6/12'>
         <fieldset className='flex flex-col space-y-8 justify-center mx-auto' aria-live='polite'>
-          <input
-            className='rounded-md border focus:outline-none focus:ring-4 focus:ring-opacity-50 appearance-none text-gray-900 bg-gray-50 border-gray-300 focus:border-primary focus:ring-primary-300 px-4 py-2.5'
+          <Input
+            type='text'
             name='title'
+            placeholder='Article Title'
             value={articleTitle}
             onChange={handleChangeArticleTitle}
-            placeholder='Article Title'
-            type='text'
           />
 
           <textarea
@@ -104,11 +104,10 @@ export default function Editor() {
             placeholder='Write your article (in markdown)'
           />
 
-          <input
-            className='rounded-md border focus:outline-none focus:ring-4 focus:ring-opacity-50 appearance-none text-gray-900 bg-gray-50 border-gray-300 focus:border-primary focus:ring-primary-300 px-4 py-1'
+          <Input
+            type='text'
             name='tagName'
             placeholder='Enter tags'
-            type='text'
             value={inputTagName}
             onChange={handleSetInputTagName}
             onKeyDown={handleKeyDownEnterInTagArea}
