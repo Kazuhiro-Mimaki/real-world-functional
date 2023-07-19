@@ -1,2 +1,2 @@
-export { Header, Input, Textarea } from './shared';
+export { Header, Input, Textarea, Button } from './shared';
 export { Article } from './article';

@@ -8,7 +8,7 @@ import { prisma } from '~/server/db.server';
 import { commitUserSession, createUserSession, getUserId } from '~/server/session.server';
 import { getByUserId } from '~/server/service';
 import { ok } from 'neverthrow';
-import { Input } from '~/components';
+import { Button, Input } from '~/components';
 
 export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);
@@ -79,9 +79,7 @@ export default function UserSettings() {
           <Input type='text' name='email' defaultValue={user.email} placeholder='Email' />
           <Input type='password' name='password' placeholder='Password' />
 
-          <button type='submit' className='text-white bg-green-600 border-green-600 self-end px-5 py-2 rounded'>
-            Update settings
-          </button>
+          <Button type='submit'>Update settings</Button>
         </fieldset>
       </Form>
     </div>
