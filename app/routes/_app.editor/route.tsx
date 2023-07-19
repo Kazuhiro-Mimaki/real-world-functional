@@ -2,7 +2,7 @@ import { Form, useActionData, useFetcher } from '@remix-run/react';
 import type { ActionArgs } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { json } from '@remix-run/node';
-import { getUserId } from '~/server/session.server';
+import { getUserIdFromSession } from '~/server/session.server';
 import { ok } from 'neverthrow';
 import { saveArticle } from '~/server/repository';
 import { createArticleWorkFlow } from '~/server/workflow/article';
@@ -21,18 +21,16 @@ export const action = async ({ request }: ActionArgs) => {
     title: form.get('title') as string,
     content: form.get('content') as string,
     tagNames: form.getAll('tagNames[]') as string[],
-    authorId: (await getUserId(request)) as number,
   };
 
-  const result = ok(input).andThen(workFlow).asyncAndThen(saveArticle({ prisma }));
+  const result = getUserIdFromSession(request)
+    .andThen((userId) => ok({ ...input, authorId: userId }))
+    .andThen(workFlow)
+    .andThen(saveArticle({ prisma }));
 
   return result.match(
-    async (_) => {
-      return redirect('/');
-    },
-    async (error) => {
-      return json({ errorMessage: error.message }, 400);
-    }
+    (_) => redirect('/'),
+    (error) => json({ errorMessage: error.message }, 400)
   );
 };
 

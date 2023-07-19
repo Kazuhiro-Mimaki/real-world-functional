@@ -20,18 +20,20 @@ export const action = async ({ request }: ActionArgs) => {
     password: form.get('password') as string,
   };
 
-  const result = ok(unValidatedUser).asyncAndThen(workFlow).andThen(saveUser({ prisma }));
+  const result = ok(unValidatedUser)
+    .asyncAndThen(workFlow)
+    .andThen(saveUser({ prisma }))
+    .andThen((user) => createUserSession(user.id))
+    .andThen(commitUserSession);
 
   return result.match(
-    async (user) => {
-      const session = await createUserSession(user.id);
-      return redirect('/', {
+    (cookie) =>
+      redirect('/', {
         headers: {
-          'Set-Cookie': await commitUserSession(session),
+          'Set-Cookie': cookie,
         },
-      });
-    },
-    async (error) => {
+      }),
+    (error) => {
       const errorMessages: string[] = [];
       if (error instanceof Error) {
         errorMessages.push(error.message);

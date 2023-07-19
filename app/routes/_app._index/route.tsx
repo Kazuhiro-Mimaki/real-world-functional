@@ -14,9 +14,7 @@ export const loader = async () => {
   const result = await getArticles({ prisma })();
 
   return result.match(
-    (articles) => {
-      return json({ articles }, 200);
-    },
+    (articles) => json({ articles }, 200),
     (error) => {
       throw new Error(error.message);
     }

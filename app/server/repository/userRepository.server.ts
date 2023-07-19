@@ -57,5 +57,5 @@ export const updateUser =
         where: { id },
         data: { username, email, password },
       }),
-      () => new Error('Fail to update user')
+      () => new Error('Prisma error')
     ).andThen((user) => User(user));

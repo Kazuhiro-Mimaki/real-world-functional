@@ -5,7 +5,7 @@ import { updateUser } from '~/server/repository';
 import { UserId } from '~/server/model/user';
 import { updateUserWorkFlow } from '~/server/workflow/user';
 import { prisma } from '~/server/db.server';
-import { commitUserSession, createUserSession, getUserId } from '~/server/session.server';
+import { commitUserSession, createUserSession, getUserIdFromSession } from '~/server/session.server';
 import { getByUserId } from '~/server/service';
 import { ok } from 'neverthrow';
 import { Button, Input } from '~/components';
@@ -16,23 +16,18 @@ type LoaderType = {
 };
 
 export const loader = async ({ request }: LoaderArgs) => {
-  const userId = await getUserId(request);
-  if (!userId) {
-    throw new Response('Unauthorized', { status: 401 });
-  }
-  const user = await prisma.user.findFirst({
-    where: { id: userId },
-  });
-  if (!user) {
-    throw new Response('Unauthorized', { status: 401 });
-  }
-  return json({ user });
+  const result = getUserIdFromSession(request).andThen(UserId).andThen(getByUserId({ prisma }));
+
+  return result.match(
+    (user) => json({ user }),
+    (error) => {
+      throw new Error(error.message);
+    }
+  );
 };
 
 export const action = async ({ request }: ActionArgs) => {
   const workFlow = updateUserWorkFlow();
-
-  const userId = Number(await getUserId(request));
 
   const form = await request.formData();
 
@@ -43,8 +38,8 @@ export const action = async ({ request }: ActionArgs) => {
     password: form.get('password') as string,
   };
 
-  const preprocess = UserId(userId)
-    .asyncAndThen(getByUserId({ prisma }))
+  const preprocess = getUserIdFromSession(request)
+    .andThen(getByUserId({ prisma }))
     .andThen((user) =>
       ok({
         input: input,
@@ -52,20 +47,20 @@ export const action = async ({ request }: ActionArgs) => {
       })
     );
 
-  const result = preprocess.andThen(workFlow).andThen(updateUser({ prisma }));
+  const result = preprocess
+    .andThen(workFlow)
+    .andThen(updateUser({ prisma }))
+    .andThen((user) => createUserSession(user.id))
+    .andThen(commitUserSession);
 
   return result.match(
-    async (user) => {
-      const session = await createUserSession(user.id);
-      return redirect('/', {
+    (cookie) =>
+      redirect('/', {
         headers: {
-          'Set-Cookie': await commitUserSession(session),
+          'Set-Cookie': cookie,
         },
-      });
-    },
-    async (error) => {
-      return json({ errorMessage: error.message }, 400);
-    }
+      }),
+    (error) => json({ errorMessage: error.message }, 400)
   );
 };
 

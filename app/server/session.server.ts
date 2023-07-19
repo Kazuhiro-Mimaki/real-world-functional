@@ -1,6 +1,11 @@
-import type { Session } from '@remix-run/node';
-import { redirect } from '@remix-run/node';
+import type { Session, SessionData } from '@remix-run/node';
 import { createCookieSessionStorage } from '@remix-run/node';
+import { ResultAsync, err, ok } from 'neverthrow';
+import type { Branded } from './model/baseTypes.server';
+import { UserId } from './model/user';
+
+type SessionType = Session<SessionData, SessionData>;
+type Cookie = Branded<string, 'Cookie'>;
 
 const sessionSecret = process.env.SESSION_SECRET;
 if (!sessionSecret) {
@@ -22,33 +27,24 @@ const storage = createCookieSessionStorage({
   },
 });
 
-export const createUserSession = async (userId: number) => {
-  const session = await storage.getSession();
-  session.set('userId', userId);
-  return session;
-};
+export const createUserSession = (userId: number): ResultAsync<SessionType, Error> =>
+  ResultAsync.fromPromise(storage.getSession(), () => new Error('Failed to create session')).andThen((session) => {
+    session.set('userId', userId);
+    return ok(session);
+  });
 
-export const commitUserSession = async (session: Session) => {
-  return await storage.commitSession(session);
-};
+export const commitUserSession = (session: Session): ResultAsync<Cookie, Error> =>
+  ResultAsync.fromPromise(
+    storage.commitSession(session) as Promise<Cookie>,
+    () => new Error('Failed to commit session')
+  );
 
-export const getUserSession = async (request: Request) => {
-  return await storage.getSession(request.headers.get('Cookie'));
-};
+const getUserSession = (headers: Headers): ResultAsync<SessionType, Error> =>
+  ResultAsync.fromPromise(storage.getSession(headers.get('Cookie')), () => new Error('Failed to commit session'));
 
-export async function getUserId(request: Request) {
-  const session = await getUserSession(request);
-  const userId = session.get('userId');
-  if (!userId || typeof userId !== 'number') return null;
-  return userId;
-}
-
-export async function requireUserId(request: Request, redirectTo: string = new URL(request.url).pathname) {
-  const session = await getUserSession(request);
-  const userId = session.get('userId');
-  if (!userId || typeof userId !== 'string') {
-    const searchParams = new URLSearchParams([['redirectTo', redirectTo]]);
-    throw redirect(`/login?${searchParams}`);
-  }
-  return userId;
-}
+export const getUserIdFromSession = (request: Request): ResultAsync<UserId, Error> =>
+  getUserSession(request.headers).andThen((session) => {
+    const userId = session.get('userId');
+    if (!userId || typeof userId !== 'number') return err(new Error('Unauthorized'));
+    return UserId(userId);
+  });
