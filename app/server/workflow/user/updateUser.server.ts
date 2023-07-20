@@ -1,6 +1,8 @@
+import type { ResultAsync } from 'neverthrow';
 import { Result, ok } from 'neverthrow';
 import { EmailAddress, Password, UserName } from '~/server/model/user';
 import { User } from '~/server/model/user';
+import { type CheckEmailExists } from '~/server/service';
 
 // ====================
 // Type
@@ -38,28 +40,34 @@ export type UpdatedUser = User & {
 // workflow
 // ====================
 
-type ValidateUserCommand = (model: UnValidatedUserCommand) => Result<ValidatedUserCommand, Error>;
-const validateUserCommand: ValidateUserCommand = (model: UnValidatedUserCommand) => {
-  const { input, user } = model;
+type ValidateUserCommand = (model: UnValidatedUserCommand) => ResultAsync<ValidatedUserCommand, Error>;
+const validateUserCommand =
+  (checkEmailExists: CheckEmailExists): ValidateUserCommand =>
+  (model: UnValidatedUserCommand) => {
+    const { input, user } = model;
 
-  const username = UserName(input.username);
-  const email = EmailAddress(input.email);
-  const password = Password(input.password);
+    const username = UserName(input.username);
+    const email = EmailAddress(input.email);
+    const password = Password(input.password);
 
-  const values = Result.combine([username, email, password]);
+    const values = Result.combine([username, email, password]);
 
-  const validatedUserInput = values.map(([username, email, password]) => ({
-    kind: 'Validated' as const,
-    username,
-    email,
-    password,
-  }));
+    const validatedUserInput = values.map(([username, email, password]) => ({
+      kind: 'Validated' as const,
+      username,
+      email,
+      password,
+    }));
 
-  return validatedUserInput.map((v) => ({
-    input: v,
-    user,
-  }));
-};
+    return validatedUserInput
+      .asyncAndThen((v) => checkEmailExists(v.email))
+      .andThen(() =>
+        validatedUserInput.map((v) => ({
+          input: v,
+          user,
+        }))
+      );
+  };
 
 type UpdateUser = (model: ValidatedUserCommand) => Result<UpdatedUser, Error>;
 const updateUser: UpdateUser = (model: ValidatedUserCommand) => {
@@ -75,6 +83,8 @@ const updateUser: UpdateUser = (model: ValidatedUserCommand) => {
   return updatedUser.map((v) => ({ ...v, kind: 'Updated' as const }));
 };
 
-type UpdateUserWorkFlow = (model: UnValidatedUserCommand) => Result<UpdatedUser, Error>;
-export const updateUserWorkFlow = (): UpdateUserWorkFlow => (model: UnValidatedUserCommand) =>
-  ok(model).andThen(validateUserCommand).andThen(updateUser);
+type UpdateUserWorkFlow = (model: UnValidatedUserCommand) => ResultAsync<UpdatedUser, Error>;
+export const updateUserWorkFlow =
+  (checkEmailExists: CheckEmailExists): UpdateUserWorkFlow =>
+  (model: UnValidatedUserCommand) =>
+    ok(model).asyncAndThen(validateUserCommand(checkEmailExists)).andThen(updateUser);
