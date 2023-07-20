@@ -1,5 +1,5 @@
 import type { ResultAsync } from 'neverthrow';
-import { Result, ok } from 'neverthrow';
+import { Result, ok, okAsync } from 'neverthrow';
 import { EmailAddress, Password, UserName } from '~/server/model/user';
 import { User } from '~/server/model/user';
 import { type CheckEmailExists } from '~/server/service';
@@ -60,7 +60,7 @@ const validateUserCommand =
     }));
 
     return validatedUserInput
-      .asyncAndThen((v) => checkEmailExists(v.email))
+      .asyncAndThen((v) => (input.email === user.email ? okAsync(null) : checkEmailExists(v.email)))
       .andThen(() =>
         validatedUserInput.map((v) => ({
           input: v,

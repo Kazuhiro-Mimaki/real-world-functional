@@ -1,4 +1,4 @@
-import type { User as UserModel } from '@prisma/client';
+import type { User as UserSchema } from '@prisma/client';
 import { Result } from 'neverthrow';
 import { UserId, UserName, EmailAddress, Password } from './vo.server';
 
@@ -10,10 +10,8 @@ export type User = {
   readonly username: UserName;
   readonly email: EmailAddress;
   readonly password: Password;
-  readonly createdAt: Date;
-  readonly updatedAt: Date;
 };
-export const User = (user: UserModel): Result<User, Error> => {
+export const User = (user: UserSchema | User): Result<User, Error> => {
   const userId = UserId(user.id);
   const username = UserName(user.username);
   const email = EmailAddress(user.email);
@@ -25,7 +23,5 @@ export const User = (user: UserModel): Result<User, Error> => {
     username,
     email,
     password,
-    createdAt: user.createdAt,
-    updatedAt: user.updatedAt,
   }));
 };
