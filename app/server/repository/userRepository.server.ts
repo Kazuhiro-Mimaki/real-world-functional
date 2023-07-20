@@ -37,10 +37,10 @@ export const findByUserId =
 export type SaveUser = (createdUser: CreatedUser) => ResultAsync<User, Error>;
 export const saveUser =
   ({ prisma }: ApplicationContext): SaveUser =>
-  ({ username, email, password }: CreatedUser) =>
+  ({ userId, username, email, password }: CreatedUser) =>
     ResultAsync.fromPromise(
       prisma.user.create({
-        data: { username, email, password },
+        data: { id: userId, username, email, password },
       }),
       () => new Error('Prisma error')
     ).andThen((user) => User(user));

@@ -12,7 +12,7 @@ type UnValidatedArticle = {
   title: string;
   content: string;
   tagNames: string[];
-  authorId: number;
+  authorId: string;
 };
 
 type ValidatedArticle = {

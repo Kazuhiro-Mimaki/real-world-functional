@@ -1,7 +1,6 @@
 import type { ResultAsync } from 'neverthrow';
 import { Result, ok, okAsync } from 'neverthrow';
-import { EmailAddress, Password, UserName } from '~/server/model/user';
-import { User } from '~/server/model/user';
+import { EmailAddress, PasswordString, UserName, User, generateHashPassword } from '~/server/model/user';
 import { type CheckEmailExists } from '~/server/service';
 
 // ====================
@@ -24,7 +23,7 @@ type ValidatedUserInput = {
   kind: 'Validated';
   username: UserName;
   email: EmailAddress;
-  password: Password;
+  password: PasswordString;
 };
 
 type ValidatedUserCommand = {
@@ -48,7 +47,7 @@ const validateUserCommand =
 
     const username = UserName(input.username);
     const email = EmailAddress(input.email);
-    const password = Password(input.password);
+    const password = PasswordString(input.password);
 
     const values = Result.combine([username, email, password]);
 
@@ -73,12 +72,14 @@ type UpdateUser = (model: ValidatedUserCommand) => Result<UpdatedUser, Error>;
 const updateUser: UpdateUser = (model: ValidatedUserCommand) => {
   const { input, user } = model;
 
-  const updatedUser = User({
-    ...user,
-    username: input.username,
-    email: input.email,
-    password: input.password,
-  });
+  const updatedUser = generateHashPassword(input.password).andThen((password) =>
+    User({
+      ...user,
+      username: input.username,
+      password,
+      email: input.email,
+    })
+  );
 
   return updatedUser.map((v) => ({ ...v, kind: 'Updated' as const }));
 };

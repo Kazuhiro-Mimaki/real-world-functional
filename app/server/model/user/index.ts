@@ -1,2 +1,2 @@
-export { User } from './model.server';
-export { UserId, UserName, EmailAddress, Password } from './vo.server';
+export { User, generateHashPassword, generateUserId } from './model.server';
+export { UserId, UserName, EmailAddress, PasswordString, HashPassword } from './vo.server';

@@ -25,7 +25,7 @@ const storage = createCookieSessionStorage({
   },
 });
 
-export const createUserSession = (userId: number): ResultAsync<SessionType, Error> =>
+export const createUserSession = (userId: string): ResultAsync<SessionType, Error> =>
   ResultAsync.fromPromise(storage.getSession(), () => new Error('Failed to create session')).andThen((session) => {
     session.set('userId', userId);
     return ok(session);
@@ -44,7 +44,7 @@ const getUserSession = async (headers: Headers) => {
 export const getUserIdFromSession = async (request: Request) => {
   const session = await getUserSession(request.headers);
   const userId = session.get('userId');
-  if (!userId || typeof userId !== 'number') {
+  if (!userId || typeof userId !== 'string') {
     throw new Error('Unauthorized');
   }
   return userId;

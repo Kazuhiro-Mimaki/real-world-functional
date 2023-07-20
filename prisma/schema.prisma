@@ -11,8 +11,8 @@ datasource db {
 }
 
 model User {
-  id         Int   @id @default(autoincrement())
-  username   String   @unique
+  id         String   @id
+  username   String
   email      String   @unique
   password   String
   createdAt  DateTime @default(now())
@@ -21,12 +21,12 @@ model User {
 }
 
 model Article {
-  id         Int   @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   title      String
   content    String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  authorId   Int
+  authorId   String
   author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   tags       Tag[]
 }

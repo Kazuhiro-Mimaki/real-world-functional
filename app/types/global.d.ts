@@ -2,7 +2,7 @@
  * request context
  */
 declare type RequestContext<Input> = {
-  userId: number;
+  userId: string;
   input: Input;
 };
 
