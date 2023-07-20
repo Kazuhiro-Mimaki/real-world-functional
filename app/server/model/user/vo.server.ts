@@ -31,18 +31,8 @@ export const EmailAddress = (input: string): Result<EmailAddress, Error> => {
 /**
  * An password string
  */
-export type PasswordString = Branded<string, 'PasswordString'>;
-export const PasswordString = (input: string): Result<PasswordString, Error> => {
+export type Password = Branded<string, 'Password'>;
+export const Password = (input: string): Result<Password, Error> => {
   const parsed = String5.safeParse(input);
-  return parsed.success
-    ? ok(parsed.data as PasswordString)
-    : err(new Error('Password must be at least 5 characters long'));
-};
-
-/**
- * An hash password
- */
-export type HashPassword = Branded<string, 'HashPassword'>;
-export const HashPassword = (input: string): Result<HashPassword, Error> => {
-  return ok(input as HashPassword);
+  return parsed.success ? ok(parsed.data as Password) : err(new Error('Password must be at least 5 characters long'));
 };

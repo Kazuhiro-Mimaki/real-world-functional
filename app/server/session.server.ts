@@ -25,7 +25,7 @@ const storage = createCookieSessionStorage({
   },
 });
 
-export const createUserSession = (userId: string): ResultAsync<SessionType, Error> =>
+export const setUserSession = (userId: string): ResultAsync<SessionType, Error> =>
   ResultAsync.fromPromise(storage.getSession(), () => new Error('Failed to create session')).andThen((session) => {
     session.set('userId', userId);
     return ok(session);

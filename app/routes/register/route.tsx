@@ -1,50 +1,18 @@
 import { Form, Link, useActionData } from '@remix-run/react';
-import { json, redirect, type ActionArgs } from '@remix-run/node';
-import { commitUserSession, createUserSession } from '~/server/session.server';
-import { createUserWorkFlow } from '~/server/workflow/user';
-import { saveUser } from '~/server/repository';
-import { ok } from 'neverthrow';
-import { prisma } from '~/server/db.server';
-import { checkEmailExists } from '~/server/service';
+import { type ActionArgs } from '@remix-run/node';
 import { Button, ErrorMessage, Input } from '~/components';
+import { serverAction } from './action.server';
 
 export const action = async ({ request }: ActionArgs) => {
-  const workFlow = createUserWorkFlow(checkEmailExists({ prisma }));
-
   const form = await request.formData();
 
-  const unValidatedUser = {
-    kind: 'UnValidated' as const,
+  const input = {
     username: form.get('username') as string,
     email: form.get('email') as string,
     password: form.get('password') as string,
   };
 
-  const result = ok(unValidatedUser)
-    .asyncAndThen(workFlow)
-    .andThen(saveUser({ prisma }))
-    .andThen((user) => createUserSession(user.id))
-    .andThen(commitUserSession);
-
-  return result.match(
-    (cookie) =>
-      redirect('/', {
-        headers: {
-          'Set-Cookie': cookie,
-        },
-      }),
-    (error) => {
-      const errorMessages: string[] = [];
-      if (error instanceof Error) {
-        errorMessages.push(error.message);
-      } else {
-        error.forEach((err) => {
-          errorMessages.push(err.message);
-        });
-      }
-      return json({ errorMessages }, 400);
-    }
-  );
+  return serverAction(input);
 };
 
 export default function Register() {

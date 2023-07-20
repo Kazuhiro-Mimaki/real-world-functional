@@ -2,20 +2,21 @@ import { redirect } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { ok } from 'neverthrow';
 import { prisma } from '~/server/db.server';
-import { checkEmailExists, getByUserId } from '~/server/service';
+import { checkEmailExists, checkCurrentPassword, getByUserId } from '~/server/service';
 import { UserId } from '~/server/model/user';
 import { updateUserWorkFlow } from '~/server/workflow/user';
 import { updateUser } from '~/server/repository';
-import { commitUserSession, createUserSession } from '~/server/session.server';
+import { commitUserSession, setUserSession } from '~/server/session.server';
 
 type Input = {
   username: string;
   email: string;
-  password: string;
+  currentPassword: string;
+  newPassword: string;
 };
 
 export const serverAction = ({ input, userId }: RequestContext<Input>) => {
-  const workFlow = updateUserWorkFlow(checkEmailExists({ prisma }));
+  const workFlow = updateUserWorkFlow(checkEmailExists({ prisma }), checkCurrentPassword());
 
   const preprocess = UserId(userId)
     .asyncAndThen(getByUserId({ prisma }))
@@ -29,7 +30,7 @@ export const serverAction = ({ input, userId }: RequestContext<Input>) => {
   const result = preprocess
     .andThen(workFlow)
     .andThen(updateUser({ prisma }))
-    .andThen((user) => createUserSession(user.id))
+    .andThen((user) => setUserSession(user.id))
     .andThen(commitUserSession);
 
   return result.match(

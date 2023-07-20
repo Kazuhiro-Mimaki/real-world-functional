@@ -32,7 +32,8 @@ export const action = async ({ request }: ActionArgs) => {
   const input = {
     username: form.get('username') as string,
     email: form.get('email') as string,
-    password: form.get('password') as string,
+    currentPassword: form.get('currentPassword') as string,
+    newPassword: form.get('newPassword') as string,
   };
 
   const userId = await getUserIdFromSession(request);
@@ -54,7 +55,8 @@ export default function UserSettings() {
         <fieldset className='flex flex-col space-y-8 justify-center mx-auto' aria-live='polite'>
           <Input type='text' name='username' defaultValue={user.username} placeholder='Username' />
           <Input type='text' name='email' defaultValue={user.email} placeholder='Email' />
-          <Input type='password' name='password' placeholder='Password' />
+          <Input type='password' name='currentPassword' placeholder='Current password' />
+          <Input type='password' name='newPassword' placeholder='New password' />
 
           {actionData?.errorMessage && <ErrorMessage>{actionData.errorMessage}</ErrorMessage>}
 
