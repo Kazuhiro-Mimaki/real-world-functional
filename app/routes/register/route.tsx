@@ -5,11 +5,11 @@ import { createUserWorkFlow } from '~/server/workflow/user';
 import { saveUser } from '~/server/repository';
 import { ok } from 'neverthrow';
 import { prisma } from '~/server/db.server';
-import { getByEmail } from '~/server/service';
+import { checkEmailExists } from '~/server/service';
 import { Button, ErrorMessage, Input } from '~/components';
 
 export const action = async ({ request }: ActionArgs) => {
-  const workFlow = createUserWorkFlow(getByEmail({ prisma }));
+  const workFlow = createUserWorkFlow(checkEmailExists({ prisma }));
 
   const form = await request.formData();
 

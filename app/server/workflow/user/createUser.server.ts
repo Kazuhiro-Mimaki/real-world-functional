@@ -1,7 +1,7 @@
-import { err, ok, Result } from 'neverthrow';
+import { ok, Result } from 'neverthrow';
 import type { ResultAsync } from 'neverthrow';
 import { EmailAddress, Password, UserName } from '~/server/model/user';
-import type { FindByEmail } from '~/server/repository';
+import type { CheckEmailExists } from '~/server/service';
 
 // ====================
 // Type
@@ -32,41 +32,34 @@ export type CreatedUser = {
 // workflow
 // ====================
 
-type ValidateUser = (model: UnValidatedUser) => Result<ValidatedUser, Error[]>;
-const validateUser: ValidateUser = (model: UnValidatedUser) => {
-  const username = UserName(model.username);
-  const email = EmailAddress(model.email);
-  const password = Password(model.password);
+type ValidateUser = (model: UnValidatedUser) => ResultAsync<ValidatedUser, Error | Error[]>;
+const validateUser =
+  (checkEmailExists: CheckEmailExists): ValidateUser =>
+  (model: UnValidatedUser) => {
+    const username = UserName(model.username);
+    const email = EmailAddress(model.email);
+    const password = Password(model.password);
 
-  const values = Result.combineWithAllErrors([username, email, password]);
+    const values = Result.combineWithAllErrors([username, email, password]);
+    const ret = values.map(([username, email, password]) => ({
+      kind: 'Validated' as const,
+      username,
+      email,
+      password,
+    }));
 
-  return values.map(([username, email, password]) => ({
-    kind: 'Validated',
-    username,
-    email,
-    password,
-  }));
-};
+    return ret.asyncAndThen((model) => checkEmailExists(model.email)).andThen(() => ret);
+  };
 
-type CreateUser = (model: ValidatedUser) => ResultAsync<CreatedUser, Error>;
-const createUser =
-  (findByEmail: FindByEmail): CreateUser =>
-  (model: ValidatedUser) =>
-    ok(model.email)
-      .asyncAndThen(findByEmail)
-      .andThen((user) => {
-        if (user) {
-          return err(new Error(`The email is already used`));
-        }
-
-        return ok({
-          ...model,
-          kind: 'Created' as const,
-        });
-      });
+type CreateUser = (model: ValidatedUser) => Result<CreatedUser, Error>;
+const createUser: CreateUser = (model: ValidatedUser) =>
+  ok({
+    ...model,
+    kind: 'Created' as const,
+  });
 
 type CreateUserWorkFlow = (model: UnValidatedUser) => ResultAsync<CreatedUser, Error | Error[]>;
 export const createUserWorkFlow =
-  (findByEmail: FindByEmail): CreateUserWorkFlow =>
+  (checkEmailExists: CheckEmailExists): CreateUserWorkFlow =>
   (model: UnValidatedUser) =>
-    ok(model).andThen(validateUser).asyncAndThen(createUser(findByEmail));
+    ok(model).asyncAndThen(validateUser(checkEmailExists)).andThen(createUser);

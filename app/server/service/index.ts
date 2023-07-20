@@ -1,2 +1,3 @@
 export { getArticles, getArticle } from './articleService.server';
-export { getByEmail, getByUserId } from './userService.server';
+export { checkEmailExists, getByUserId } from './userService.server';
+export type { CheckEmailExists } from './userService.server';

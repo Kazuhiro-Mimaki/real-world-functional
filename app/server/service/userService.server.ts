@@ -4,13 +4,13 @@ import { findByUserId, findByEmail } from '~/server/repository';
 import type { ApplicationContext } from '~/server/model/baseTypes.server';
 
 /**
- * get user by email
+ * check email already exist
  */
-type GetByEmail = (email: EmailAddress) => ResultAsync<User | null, Error>;
-export const getByEmail =
-  (context: ApplicationContext): GetByEmail =>
+export type CheckEmailExists = (email: EmailAddress) => ResultAsync<null, Error>;
+export const checkEmailExists =
+  (context: ApplicationContext): CheckEmailExists =>
   (email: EmailAddress) =>
-    findByEmail(context)(email).andThen((user) => (user ? ok(user) : ok(null)));
+    findByEmail(context)(email).andThen((user) => (user ? err(new Error('The email already exists')) : ok(null)));
 
 /**
  * get user by id

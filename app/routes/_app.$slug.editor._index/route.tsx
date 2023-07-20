@@ -8,6 +8,7 @@ import type { Article } from '~/client/model';
 import { ArticleId } from '~/server/model/article';
 import { getArticle } from '~/server/service';
 import { prisma } from '~/server/db.server';
+import { serverAction } from './action.server';
 
 type LoaderType = {
   article: Article;
@@ -38,32 +39,22 @@ export const action = async ({ request }: ActionArgs) => {
 
   const userId = await getUserIdFromSession(request);
 
-  return { input, userId };
+  return serverAction({ input, userId });
 };
 
 export default function Editor() {
   const { article } = useLoaderData<LoaderType>();
   const actionData = useActionData<typeof action>();
 
-  const [articleTitle, setArticleTitle] = useState('');
-  const [articleContent, setArticleContent] = useState('');
   const [inputTagName, setInputTagName] = useState('');
-  const [tagNames, setTagNames] = useState<string[]>([]);
-
-  const handleChangeArticleTitle = (e: ChangeEvent<HTMLInputElement>) => {
-    setArticleTitle(e.target.value);
-  };
-
-  const handleChangeArticleContent = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    setArticleContent(e.target.value);
-  };
+  const [tagNames, setTagNames] = useState<string[]>(article.tags.map((tag) => tag.name));
 
   const handleSetInputTagName = (e: ChangeEvent<HTMLInputElement>) => {
     setInputTagName(e.target.value);
   };
 
   const handleKeyDownEnterInTagArea = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.code === 'Space') {
       setTagNames((prev) => [...prev, inputTagName]);
       clearInputTagName();
     }
@@ -83,24 +74,12 @@ export default function Editor() {
 
       <Form method='post' action='/editor' className='w-full sm:w-10/12 md:w-8/12 lg:w-6/12'>
         <fieldset className='flex flex-col space-y-8 justify-center mx-auto' aria-live='polite'>
-          <Input
-            type='text'
-            name='title'
-            placeholder='Article Title'
-            value={articleTitle}
-            onChange={handleChangeArticleTitle}
-          />
+          <Input type='text' name='title' placeholder='Article Title' defaultValue={article.title} />
 
-          <Textarea
-            name='content'
-            placeholder='Write your article '
-            value={articleContent}
-            onChange={handleChangeArticleContent}
-          />
+          <Textarea name='content' placeholder='Write your article' defaultValue={article.content} />
 
           <Input
             type='text'
-            name='tagName'
             placeholder='Enter tags'
             value={inputTagName}
             onChange={handleSetInputTagName}
@@ -114,9 +93,12 @@ export default function Editor() {
                 <span className='ml-2 hover:cursor-pointer' onClick={() => handleClickDeleteTagButton(i)}>
                   x
                 </span>
+                <Input type='hidden' name='tagNames[]' value={tagName} />
               </span>
             ))}
           </div>
+
+          {actionData?.errorMessage && <ErrorMessage>{actionData.errorMessage}</ErrorMessage>}
 
           <Button type='submit'>Publish Article</Button>
         </fieldset>
