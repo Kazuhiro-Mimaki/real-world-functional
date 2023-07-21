@@ -56,13 +56,11 @@ const validateUser =
 
 type CreateUser = (model: ValidatedUser) => Result<CreatedUser, ValidationError>;
 const createUser: CreateUser = (model: ValidatedUser) =>
-  generateUserId().andThen((userId) =>
-    ok({
-      ...model,
-      userId,
-      kind: 'Created' as const,
-    })
-  );
+  ok({
+    ...model,
+    userId: generateUserId(),
+    kind: 'Created' as const,
+  });
 
 type CreateUserWorkFlow = (model: UnValidatedUser) => ResultAsync<CreatedUser, PrismaClientError | ValidationError>;
 export const createUserWorkFlow =
