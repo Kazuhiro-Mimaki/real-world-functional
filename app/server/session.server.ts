@@ -1,6 +1,7 @@
 import type { Session, SessionData } from '@remix-run/node';
 import { createCookieSessionStorage } from '@remix-run/node';
 import { ResultAsync, ok } from 'neverthrow';
+import { AuthorizationError } from '~/utils/error';
 
 type SessionType = Session<SessionData, SessionData>;
 type Cookie = Branded<string, 'Cookie'>;
@@ -25,16 +26,18 @@ const storage = createCookieSessionStorage({
   },
 });
 
-export const setUserSession = (userId: string): ResultAsync<SessionType, Error> =>
-  ResultAsync.fromPromise(storage.getSession(), () => new Error('Failed to create session')).andThen((session) => {
-    session.set('userId', userId);
-    return ok(session);
-  });
+export const setUserSession = (userId: string): ResultAsync<SessionType, AuthorizationError> =>
+  ResultAsync.fromPromise(storage.getSession(), () => new AuthorizationError('Failed to create session')).andThen(
+    (session) => {
+      session.set('userId', userId);
+      return ok(session);
+    }
+  );
 
-export const commitUserSession = (session: Session): ResultAsync<Cookie, Error> =>
+export const commitUserSession = (session: Session): ResultAsync<Cookie, AuthorizationError> =>
   ResultAsync.fromPromise(
     storage.commitSession(session) as Promise<Cookie>,
-    () => new Error('Failed to commit session')
+    () => new AuthorizationError('Failed to commit session')
   );
 
 const getUserSession = async (headers: Headers) => {

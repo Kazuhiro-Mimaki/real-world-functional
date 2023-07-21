@@ -3,11 +3,13 @@ import { Article } from '~/server/model/article/model.server';
 import type { CreatedArticle } from '~/server/workflow/article';
 import type { ApplicationContext } from '~/server/model/baseTypes.server';
 import type { ArticleId } from '~/server/model/article';
+import type { ValidationError } from '~/utils/error';
+import { PrismaClientError } from '~/utils/error';
 
 /**
  * save article
  */
-export type SaveArticle = (createdArticle: CreatedArticle) => ResultAsync<Article, Error>;
+export type SaveArticle = (createdArticle: CreatedArticle) => ResultAsync<Article, PrismaClientError | ValidationError>;
 export const saveArticle =
   ({ prisma }: ApplicationContext): SaveArticle =>
   ({ title, content, tagNames, authorId }: CreatedArticle) => {
@@ -24,14 +26,14 @@ export const saveArticle =
           tags: true,
         },
       }),
-      () => new Error('Prisma error')
+      (err) => new PrismaClientError('Prisma error', { cause: err })
     ).andThen((article) => Article(article));
   };
 
 /**
  * find articles
  */
-export type FindArticles = () => ResultAsync<Article[], Error>;
+export type FindArticles = () => ResultAsync<Article[], PrismaClientError | ValidationError>;
 export const findArticles =
   ({ prisma }: ApplicationContext): FindArticles =>
   () => {
@@ -42,14 +44,14 @@ export const findArticles =
           tags: true,
         },
       }),
-      () => new Error('Prisma error')
+      (err) => new PrismaClientError('Prisma error', { cause: err })
     ).andThen((articles) => Result.combine(articles.map((v) => Article(v))));
   };
 
 /**
  * find article
  */
-export type FindArticle = (articleId: ArticleId) => ResultAsync<Article | null, Error>;
+export type FindArticle = (articleId: ArticleId) => ResultAsync<Article | null, PrismaClientError | ValidationError>;
 export const findArticle =
   ({ prisma }: ApplicationContext): FindArticle =>
   (articleId: ArticleId) => {
@@ -61,6 +63,6 @@ export const findArticle =
           tags: true,
         },
       }),
-      () => new Error('Prisma error')
+      (err) => new PrismaClientError('Prisma error', { cause: err })
     ).andThen((article) => (article ? Article(article) : ok(null)));
   };

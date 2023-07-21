@@ -36,8 +36,7 @@ export default function Register() {
           <Button type='submit'>Sign up</Button>
         </fieldset>
 
-        {actionData?.errorMessages &&
-          actionData.errorMessages.map((err, i) => <ErrorMessage key={i}>{err}</ErrorMessage>)}
+        {actionData?.errorMessage && <ErrorMessage>{actionData.errorMessage}</ErrorMessage>}
       </Form>
     </div>
   );

@@ -23,7 +23,7 @@ export const loader = async ({ params }: LoaderArgs) => {
   return result.match(
     (article) => json({ article }, 200),
     (error) => {
-      throw new Error(error.message);
+      throw error;
     }
   );
 };

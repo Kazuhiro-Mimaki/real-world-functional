@@ -3,6 +3,7 @@ import type { ResultAsync } from 'neverthrow';
 import type { UserId } from '~/server/model/user';
 import { generateUserId, EmailAddress, UserName, Password } from '~/server/model/user';
 import type { CheckEmailExists } from '~/server/service';
+import type { PrismaClientError, ValidationError } from '~/utils/error';
 
 // ====================
 // Type
@@ -34,7 +35,7 @@ export type CreatedUser = {
 // workflow
 // ====================
 
-type ValidateUser = (model: UnValidatedUser) => ResultAsync<ValidatedUser, Error | Error[]>;
+type ValidateUser = (model: UnValidatedUser) => ResultAsync<ValidatedUser, PrismaClientError | ValidationError>;
 const validateUser =
   (checkEmailExists: CheckEmailExists): ValidateUser =>
   (model: UnValidatedUser) => {
@@ -42,7 +43,7 @@ const validateUser =
     const email = EmailAddress(model.email);
     const password = Password(model.password);
 
-    const values = Result.combineWithAllErrors([username, email, password]);
+    const values = Result.combine([username, email, password]);
     const validatedUserInput = values.map(([username, email, password]) => ({
       kind: 'Validated' as const,
       username,
@@ -53,7 +54,7 @@ const validateUser =
     return validatedUserInput.asyncAndThen((model) => checkEmailExists(model.email)).andThen(() => validatedUserInput);
   };
 
-type CreateUser = (model: ValidatedUser) => Result<CreatedUser, Error>;
+type CreateUser = (model: ValidatedUser) => Result<CreatedUser, ValidationError>;
 const createUser: CreateUser = (model: ValidatedUser) =>
   generateUserId().andThen((userId) =>
     ok({
@@ -63,7 +64,7 @@ const createUser: CreateUser = (model: ValidatedUser) =>
     })
   );
 
-type CreateUserWorkFlow = (model: UnValidatedUser) => ResultAsync<CreatedUser, Error | Error[]>;
+type CreateUserWorkFlow = (model: UnValidatedUser) => ResultAsync<CreatedUser, PrismaClientError | ValidationError>;
 export const createUserWorkFlow =
   (checkEmailExists: CheckEmailExists): CreateUserWorkFlow =>
   (model: UnValidatedUser) =>

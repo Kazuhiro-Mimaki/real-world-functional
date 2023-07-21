@@ -16,7 +16,7 @@ export const loader = async () => {
   return result.match(
     (articles) => json({ articles }, 200),
     (error) => {
-      throw new Error(error.message);
+      throw error;
     }
   );
 };

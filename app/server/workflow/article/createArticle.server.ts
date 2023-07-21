@@ -2,6 +2,7 @@ import { Result, ok } from 'neverthrow';
 import { Content, Title } from '~/server/model/article';
 import { UserId } from '~/server/model/user';
 import { TagName } from '~/server/model/tag';
+import type { ValidationError } from '~/utils/error';
 
 // ====================
 // Type
@@ -35,7 +36,7 @@ export type CreatedArticle = {
 // workflow
 // ====================
 
-type ValidateArticle = (model: UnValidatedArticle) => Result<ValidatedArticle, Error>;
+type ValidateArticle = (model: UnValidatedArticle) => Result<ValidatedArticle, ValidationError>;
 const validateArticle: ValidateArticle = (model: UnValidatedArticle) => {
   const title = Title(model.title);
   const content = Content(model.content);
@@ -53,7 +54,7 @@ const validateArticle: ValidateArticle = (model: UnValidatedArticle) => {
   }));
 };
 
-type CreateArticle = (model: ValidatedArticle) => Result<CreatedArticle, Error>;
+type CreateArticle = (model: ValidatedArticle) => Result<CreatedArticle, ValidationError>;
 const createArticle: CreateArticle = (model: ValidatedArticle) => {
   return ok({
     ...model,
@@ -61,6 +62,6 @@ const createArticle: CreateArticle = (model: ValidatedArticle) => {
   });
 };
 
-type CreateArticleWorkFlow = (model: UnValidatedArticle) => Result<CreatedArticle, Error>;
+type CreateArticleWorkFlow = (model: UnValidatedArticle) => Result<CreatedArticle, ValidationError>;
 export const createArticleWorkFlow = (): CreateArticleWorkFlow => (model: UnValidatedArticle) =>
   ok(model).andThen(validateArticle).andThen(createArticle);

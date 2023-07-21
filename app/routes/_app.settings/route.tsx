@@ -21,7 +21,7 @@ export const loader = async ({ request }: LoaderArgs) => {
   return result.match(
     (user) => json({ user }),
     (error) => {
-      throw new Error(error.message);
+      throw error;
     }
   );
 };

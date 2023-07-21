@@ -3,6 +3,7 @@ import { Result } from 'neverthrow';
 import { Tag } from '../tag/model.server';
 import { User } from '../user/model.server';
 import { ArticleId, Content, Title } from './vo.server';
+import type { ValidationError } from '~/utils/error';
 
 /**
  * Article
@@ -21,7 +22,7 @@ export const Article = (
     author: UserPrisma;
     tags: TagPrisma[];
   }
-): Result<Article, Error> => {
+): Result<Article, ValidationError> => {
   const articleId = ArticleId(article.id);
   const title = Title(article.title);
   const content = Content(article.content);

@@ -3,5 +3,6 @@ module.exports = {
   extends: ['@remix-run/eslint-config', '@remix-run/eslint-config/node'],
   rules: {
     '@typescript-eslint/no-redeclare': 'off',
+    '@typescript-eslint/no-useless-constructor': 'off',
   },
 };

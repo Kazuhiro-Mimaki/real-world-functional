@@ -4,6 +4,7 @@ import { Password } from '~/server/model/user';
 import { EmailAddress, UserName, User } from '~/server/model/user';
 import type { CheckCurrentPassword } from '~/server/service';
 import { type CheckEmailExists } from '~/server/service';
+import type { PrismaClientError, ValidationError } from '~/utils/error';
 
 // ====================
 // Type
@@ -42,7 +43,9 @@ export type UpdatedUser = User & {
 // workflow
 // ====================
 
-type ValidateUserCommand = (model: UnValidatedUserCommand) => ResultAsync<ValidatedUserCommand, Error>;
+type ValidateUserCommand = (
+  model: UnValidatedUserCommand
+) => ResultAsync<ValidatedUserCommand, PrismaClientError | ValidationError>;
 const validateUserCommand =
   (checkEmailExists: CheckEmailExists, checkCurrentPassword: CheckCurrentPassword): ValidateUserCommand =>
   (model: UnValidatedUserCommand) => {
@@ -77,7 +80,7 @@ const validateUserCommand =
       );
   };
 
-type UpdateUser = (model: ValidatedUserCommand) => Result<UpdatedUser, Error>;
+type UpdateUser = (model: ValidatedUserCommand) => Result<UpdatedUser, ValidationError>;
 const updateUser: UpdateUser = (model: ValidatedUserCommand) => {
   const { input, user } = model;
 
@@ -93,7 +96,9 @@ const updateUser: UpdateUser = (model: ValidatedUserCommand) => {
   return updatedUser.map((v) => ({ ...v, kind: 'Updated' as const }));
 };
 
-type UpdateUserWorkFlow = (model: UnValidatedUserCommand) => ResultAsync<UpdatedUser, Error>;
+type UpdateUserWorkFlow = (
+  model: UnValidatedUserCommand
+) => ResultAsync<UpdatedUser, PrismaClientError | ValidationError>;
 export const updateUserWorkFlow =
   (checkEmailExists: CheckEmailExists, checkCurrentPassword: CheckCurrentPassword): UpdateUserWorkFlow =>
   (model: UnValidatedUserCommand) =>

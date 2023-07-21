@@ -30,15 +30,7 @@ export const serverAction = (input: Input) => {
         },
       }),
     (error) => {
-      const errorMessages: string[] = [];
-      if (error instanceof Error) {
-        errorMessages.push(error.message);
-      } else {
-        error.forEach((err) => {
-          errorMessages.push(err.message);
-        });
-      }
-      return json({ errorMessages }, 400);
+      return json({ errorMessage: error.message }, 400);
     }
   );
 };

@@ -3,6 +3,7 @@ import { Result } from 'neverthrow';
 import { Password } from './vo.server';
 import { UserId, UserName, EmailAddress } from './vo.server';
 import crypto from 'crypto';
+import type { ValidationError } from '~/utils/error';
 
 /**
  * User
@@ -13,7 +14,7 @@ export type User = {
   readonly email: EmailAddress;
   readonly password: Password;
 };
-export const User = (user: UserSchema | User): Result<User, Error> => {
+export const User = (user: UserSchema | User): Result<User, ValidationError> => {
   const userId = UserId(user.id);
   const username = UserName(user.username);
   const email = EmailAddress(user.email);

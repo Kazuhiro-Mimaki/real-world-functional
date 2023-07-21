@@ -1,6 +1,7 @@
 import type { Tag as TagPrisma } from '@prisma/client';
 import { Result } from 'neverthrow';
 import { TagId, TagName } from './vo.server';
+import type { ValidationError } from '~/utils/error';
 
 /**
  * Tag
@@ -11,7 +12,7 @@ export type Tag = {
   readonly createdAt: Date;
   readonly updatedAt: Date;
 };
-export const Tag = (tag: TagPrisma): Result<Tag, Error> => {
+export const Tag = (tag: TagPrisma): Result<Tag, ValidationError> => {
   const id = TagId(tag.id);
   const name = TagName(tag.name);
 
