@@ -1,7 +1,8 @@
-import { err, ok, type ResultAsync } from 'neverthrow';
+import { err, type ResultAsync } from 'neverthrow';
 import { findArticles, findArticle } from '~/server/repository';
 import type { ApplicationContext } from '~/server/model/baseTypes.server';
-import type { Article, ArticleId } from '~/server/model/article';
+import { Article } from '~/server/model/article';
+import type { ArticleId } from '~/server/model/article';
 import { ResourceNotFoundError } from '~/utils/error';
 import type { ValidationError } from '~/utils/error';
 import type { PrismaClientError } from '~/utils/error';
@@ -25,5 +26,5 @@ export const getArticle =
   (context: ApplicationContext): GetArticle =>
   (articleId: ArticleId) =>
     findArticle(context)(articleId).andThen((article) =>
-      article ? ok(article) : err(new ResourceNotFoundError('Article not found'))
+      article ? Article(article) : err(new ResourceNotFoundError('Article not found'))
     );

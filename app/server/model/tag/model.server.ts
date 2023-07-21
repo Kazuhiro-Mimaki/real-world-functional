@@ -1,4 +1,4 @@
-import type { Tag as TagPrisma } from '@prisma/client';
+import type { Tag as TagSchema } from '@prisma/client';
 import { Result } from 'neverthrow';
 import { TagId, TagName } from './vo.server';
 import type { ValidationError } from '~/utils/error';
@@ -9,10 +9,8 @@ import type { ValidationError } from '~/utils/error';
 export type Tag = {
   readonly id: TagId;
   readonly name: TagName;
-  readonly createdAt: Date;
-  readonly updatedAt: Date;
 };
-export const Tag = (tag: TagPrisma): Result<Tag, ValidationError> => {
+export const Tag = (tag: TagSchema | Tag): Result<Tag, ValidationError> => {
   const id = TagId(tag.id);
   const name = TagName(tag.name);
 

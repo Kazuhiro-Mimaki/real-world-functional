@@ -1,4 +1,4 @@
-import type { Article as ArticlePrisma, User as UserPrisma, Tag as TagPrisma } from '@prisma/client';
+import type { Article as ArticleSchema, User as UserSchema, Tag as TagPrisma } from '@prisma/client';
 import { Result } from 'neverthrow';
 import { Tag } from '../tag/model.server';
 import { User } from '../user/model.server';
@@ -12,16 +12,16 @@ export type Article = {
   readonly id: ArticleId;
   readonly title: Title;
   readonly content: Content;
-  readonly createdAt: Date;
-  readonly updatedAt: Date;
   readonly author: User;
   readonly tags: Tag[];
 };
 export const Article = (
-  article: ArticlePrisma & {
-    author: UserPrisma;
-    tags: TagPrisma[];
-  }
+  article:
+    | (ArticleSchema & {
+        author: UserSchema;
+        tags: TagPrisma[];
+      })
+    | Article
 ): Result<Article, ValidationError> => {
   const articleId = ArticleId(article.id);
   const title = Title(article.title);
@@ -34,8 +34,6 @@ export const Article = (
     id: articleId,
     title: title,
     content: content,
-    createdAt: article.createdAt,
-    updatedAt: article.updatedAt,
     author: author,
     tags: tags,
   }));
