@@ -1,6 +1,6 @@
 import { ok, Result } from 'neverthrow';
 import type { ResultAsync } from 'neverthrow';
-import type { UserId } from '~/server/model/user';
+import type { GenerateUserId, UserId } from '~/server/model/user';
 import { generateUserId, EmailAddress, UserName, Password } from '~/server/model/user';
 import type { CheckEmailExists } from '~/server/service';
 import type { PrismaClientError, ValidationError } from '~/utils/error';
@@ -55,15 +55,17 @@ const validateUser =
   };
 
 type CreateUser = (model: ValidatedUser) => Result<CreatedUser, ValidationError>;
-const createUser: CreateUser = (model: ValidatedUser) =>
-  ok({
-    ...model,
-    userId: generateUserId(),
-    kind: 'Created' as const,
-  });
+const createUser =
+  (generateUserId: GenerateUserId): CreateUser =>
+  (model: ValidatedUser) =>
+    ok({
+      ...model,
+      userId: generateUserId(),
+      kind: 'Created' as const,
+    });
 
 type CreateUserWorkFlow = (model: UnValidatedUser) => ResultAsync<CreatedUser, PrismaClientError | ValidationError>;
 export const createUserWorkFlow =
-  (checkEmailExists: CheckEmailExists): CreateUserWorkFlow =>
+  (checkEmailExists: CheckEmailExists, generateUserId: GenerateUserId): CreateUserWorkFlow =>
   (model: UnValidatedUser) =>
-    ok(model).asyncAndThen(validateUser(checkEmailExists)).andThen(createUser);
+    ok(model).asyncAndThen(validateUser(checkEmailExists)).andThen(createUser(generateUserId));

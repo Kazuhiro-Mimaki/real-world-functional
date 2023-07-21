@@ -29,4 +29,5 @@ export const User = (user: UserSchema | User): Result<User, ValidationError> => 
   }));
 };
 
-export const generateUserId = () => crypto.randomUUID() as UserId;
+export type GenerateUserId = () => UserId;
+export const generateUserId = (): GenerateUserId => () => crypto.randomUUID() as UserId;

@@ -6,6 +6,7 @@ import { checkEmailExists } from '~/server/service';
 import { createUserWorkFlow } from '~/server/workflow/user';
 import { saveUser } from '~/server/repository';
 import { commitUserSession, setUserSession } from '~/server/session.server';
+import { generateUserId } from '~/server/model/user';
 
 type Input = {
   username: string;
@@ -14,7 +15,7 @@ type Input = {
 };
 
 export const serverAction = (input: Input) => {
-  const workFlow = createUserWorkFlow(checkEmailExists({ prisma }));
+  const workFlow = createUserWorkFlow(checkEmailExists({ prisma }), generateUserId());
 
   const result = ok(toUnValidatedUser(input))
     .asyncAndThen(workFlow)

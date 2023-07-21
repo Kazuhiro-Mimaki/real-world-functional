@@ -84,14 +84,12 @@ type UpdateUser = (model: ValidatedUserCommand) => Result<UpdatedUser, Validatio
 const updateUser: UpdateUser = (model: ValidatedUserCommand) => {
   const { input, user } = model;
 
-  const updatedUser = ok(input.password).andThen((password) =>
-    User({
-      ...user,
-      username: input.username,
-      password,
-      email: input.email,
-    })
-  );
+  const updatedUser = User({
+    ...user,
+    username: input.username,
+    password: input.password,
+    email: input.email,
+  });
 
   return updatedUser.map((v) => ({ ...v, kind: 'Updated' as const }));
 };
