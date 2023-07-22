@@ -1,10 +1,10 @@
 import type { Result } from 'neverthrow';
-import { err, ok, type ResultAsync } from 'neverthrow';
+import { ResultAsync, err, ok } from 'neverthrow';
 import type { Password } from '~/server/model/user';
 import { User, type EmailAddress, type UserId } from '~/server/model/user';
-import { findByUserId, findByEmail } from '~/server/repository';
+import { findByUserId } from '~/server/repository';
 import type { ApplicationContext } from '~/server/model/baseTypes.server';
-import type { PrismaClientError } from '~/utils/error';
+import { PrismaClientError } from '~/utils/error';
 import { ValidationError, ResourceNotFoundError } from '~/utils/error';
 
 /**
@@ -12,11 +12,12 @@ import { ValidationError, ResourceNotFoundError } from '~/utils/error';
  */
 export type CheckEmailExists = (email: EmailAddress) => ResultAsync<null, PrismaClientError | ValidationError>;
 export const checkEmailExists =
-  (context: ApplicationContext): CheckEmailExists =>
+  ({ prisma }: ApplicationContext): CheckEmailExists =>
   (email: EmailAddress) =>
-    findByEmail(context)(email).andThen((user) =>
-      user ? err(new ValidationError('The email already exists')) : ok(null)
-    );
+    ResultAsync.fromPromise(
+      prisma.user.findFirst({ where: { email } }),
+      (err) => new PrismaClientError('Prisma error', { cause: err })
+    ).andThen((user) => (user ? err(new ValidationError('The email already exists')) : ok(null)));
 
 /**
  * check password is correct
