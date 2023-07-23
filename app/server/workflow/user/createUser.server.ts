@@ -1,7 +1,7 @@
 import { ok, Result } from 'neverthrow';
 import type { ResultAsync } from 'neverthrow';
 import type { GenerateUserId, UserId } from '~/server/model/user';
-import { generateUserId, EmailAddress, UserName, Password } from '~/server/model/user';
+import { EmailAddress, UserName, Password } from '~/server/model/user';
 import type { CheckEmailExists } from '~/server/service';
 import type { PrismaClientError, ValidationError } from '~/utils/error';
 
@@ -36,7 +36,7 @@ export type CreatedUser = {
 // ====================
 
 type ValidateUser = (model: UnValidatedUser) => ResultAsync<ValidatedUser, PrismaClientError | ValidationError>;
-const validateUser =
+export const validateUser =
   (checkEmailExists: CheckEmailExists): ValidateUser =>
   (model: UnValidatedUser) => {
     const username = UserName(model.username);
