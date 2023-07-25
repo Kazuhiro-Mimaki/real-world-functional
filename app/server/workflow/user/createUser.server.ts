@@ -44,14 +44,15 @@ export const validateUser =
     const password = Password(model.password);
 
     const values = Result.combine([username, email, password]);
-    const validatedUserInput = values.map(([username, email, password]) => ({
-      kind: 'Validated' as const,
+    const combinedValue = values.map(([username, email, password]) => ({
       username,
       email,
       password,
     }));
 
-    return validatedUserInput.asyncAndThen((model) => checkEmailExists(model.email)).andThen(() => validatedUserInput);
+    return combinedValue
+      .asyncAndThen((model) => checkEmailExists(model.email))
+      .andThen(() => combinedValue.map((model) => ({ ...model, kind: 'Validated' as const })));
   };
 
 type CreateUser = (model: ValidatedUser) => Result<CreatedUser, ValidationError>;
